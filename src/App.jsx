@@ -5,19 +5,32 @@ const furnitureList = [
   {
     id: "table1",
     name: "Skarpt Bord",
-    images: ["/images/table/table-1.png", "/images/table/table-2.png", "/images/table/table-3.png"],
+    images: [
+      `${import.meta.env.BASE_URL}images/table/table-1.png`,
+      `${import.meta.env.BASE_URL}images/table/table-2.png`,
+      `${import.meta.env.BASE_URL}images/table/table-3.png`,
+    ],
   },
   {
     id: "chair1",
     name: "Skarp Stol",
-    images: ["/images/chair/chair-1.png", "/images/chair/chair-2.png", "/images/chair/chair-3.png"],
+    images: [
+      `${import.meta.env.BASE_URL}images/chair/chair-1.png`,
+      `${import.meta.env.BASE_URL}images/chair/chair-2.png`,
+      `${import.meta.env.BASE_URL}images/chair/chair-3.png`,
+    ],
   },
   {
     id: "shelf1",
     name: "Skarp Hylle",
-    images: ["/images/shelf/shelf-1.png", "/images/shelf/shelf-2.png", "/images/shelf/shelf-3.png"],
+    images: [
+      `${import.meta.env.BASE_URL}images/shelf/shelf-1.png`,
+      `${import.meta.env.BASE_URL}images/shelf/shelf-2.png`,
+      `${import.meta.env.BASE_URL}images/shelf/shelf-3.png`,
+    ],
   },
 ];
+
 
 // Centralized layout wrapper with consistent cement-color background
 const LayoutWrapper = ({ children }) => (
@@ -53,7 +66,7 @@ const Home = () => (
   <LayoutWrapper>
     <div className="flex flex-col items-center justify-center flex-grow pt-28">
       <img
-        src="/images/hero-table.png"
+        src={`${import.meta.env.BASE_URL}images/hero-table.png`}
         alt="Industrial Table"
         className="w-full max-w-4xl object-cover rounded-2xl shadow-lg"
       />
