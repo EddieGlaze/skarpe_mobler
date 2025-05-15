@@ -25,8 +25,7 @@ const furnitureList = [
     name: "Skarp Hylle",
     images: [
       `${import.meta.env.BASE_URL}images/shelf/shelf-1.png`,
-      `${import.meta.env.BASE_URL}images/shelf/shelf-2.png`,
-      `${import.meta.env.BASE_URL}images/shelf/shelf-3.png`,
+      `${import.meta.env.BASE_URL}images/shelf/shelf-2.png`
     ],
   },
 ];
@@ -57,8 +56,8 @@ const Navigation = () => (
 );
 
 const Footer = () => (
-  <footer className="w-full bg-gray-600 text-white py-12 px-8 text-center mt-16">
-    <p className="font-light">Contact us: hannahjelmeland@gmail.com | +47 123 45 678</p>
+  <footer className="w-full bg-gray-400 text-white py-12 px-8 text-center mt-16">
+    <p className="font-light">Contact: edvard@glazebrook.com | +47 123 45 678</p>
   </footer>
 );
 
@@ -66,7 +65,7 @@ const Home = () => (
   <LayoutWrapper>
     <div className="flex flex-col items-center justify-center flex-grow pt-28">
       <img
-        src={`${import.meta.env.BASE_URL}images/hero-table.png`}
+        src={`${import.meta.env.BASE_URL}images/table/table-1.png`}
         alt="Industrial Table"
         className="w-full max-w-4xl object-cover rounded-2xl shadow-lg"
       />
@@ -149,7 +148,7 @@ const FurnitureDetail = () => {
         <div className="flex justify-center w-full">
           <a
             href={`mailto:hannahjelmeland@gmail.com?subject=Request about ${item.name}`}
-            className="inline-block bg-gray-600 text-white px-6 py-3 rounded hover:bg-gray-700 transition font-light"
+            className="inline-block bg-gray-400 text-white px-6 py-3 rounded hover:bg-gray-700 transition font-light"
           >
             Request this furniture
           </a>
@@ -161,7 +160,7 @@ const FurnitureDetail = () => {
 
 export default function App() {
   return (
-    <Router>
+    <Router basename={import.meta.env.BASE_URL}>
       <Navigation />
       <Routes>
         <Route path="/" element={<Home />} />
