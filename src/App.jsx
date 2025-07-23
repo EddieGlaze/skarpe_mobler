@@ -20,7 +20,70 @@ const furnitureList = [
       `${import.meta.env.BASE_URL}images/chair/chair-3.JPEG`,
     ],
   },
-  // other items truncated for brevity...
+  {
+    id: "shelf1",
+    name: "Skarp Hylle",
+    images: [
+      `${import.meta.env.BASE_URL}images/shelf/shelf-1.JPEG`,
+      `${import.meta.env.BASE_URL}images/shelf/shelf-2.JPEG`,
+      `${import.meta.env.BASE_URL}images/shelf/shelf-3.JPEG`,
+      `${import.meta.env.BASE_URL}images/shelf/shelf-4.JPEG`,
+    ],
+  },
+  {
+    id: "table2",
+    name: "Skarpt Bord II",
+    images: [
+      `${import.meta.env.BASE_URL}images/table/table-2.JPEG`,
+      `${import.meta.env.BASE_URL}images/table/table-1.JPEG`,
+      `${import.meta.env.BASE_URL}images/table/table-3.JPEG`,
+    ],
+  },
+  {
+    id: "chair2",
+    name: "Skarp Stol II",
+    images: [
+      `${import.meta.env.BASE_URL}images/chair/chair-2.JPEG`,
+      `${import.meta.env.BASE_URL}images/chair/chair-1.JPEG`,
+      `${import.meta.env.BASE_URL}images/chair/chair-3.JPEG`,
+    ],
+  },
+  {
+    id: "shelf2",
+    name: "Skarp Hylle II",
+    images: [
+      `${import.meta.env.BASE_URL}images/shelf/shelf-2.JPEG`,
+      `${import.meta.env.BASE_URL}images/shelf/shelf-1.JPEG`,
+      `${import.meta.env.BASE_URL}images/shelf/shelf-3.JPEG`,
+    ],
+  },
+  {
+    id: "table3",
+    name: "Skarpt Bord III",
+    images: [
+      `${import.meta.env.BASE_URL}images/table/table-3.JPEG`,
+      `${import.meta.env.BASE_URL}images/table/table-1.JPEG`,
+      `${import.meta.env.BASE_URL}images/table/table-2.JPEG`,
+    ],
+  },
+  {
+    id: "chair3",
+    name: "Skarp Stol III",
+    images: [
+      `${import.meta.env.BASE_URL}images/chair/chair-3.JPEG`,
+      `${import.meta.env.BASE_URL}images/chair/chair-1.JPEG`,
+      `${import.meta.env.BASE_URL}images/chair/chair-2.JPEG`,
+    ],
+  },
+  {
+    id: "shelf3",
+    name: "Skarp Hylle III",
+    images: [
+      `${import.meta.env.BASE_URL}images/shelf/shelf-3.JPEG`,
+      `${import.meta.env.BASE_URL}images/shelf/shelf-1.JPEG`,
+      `${import.meta.env.BASE_URL}images/shelf/shelf-2.JPEG`,
+    ],
+  },
 ];
 
 const PageTransitionContext = React.createContext();
@@ -52,7 +115,7 @@ const PageTransitionProvider = ({ children }) => {
       <div className={`transition-opacity ease-in-out`} style={{ opacity: isTransitioning ? 0 : 1, transitionDuration: `${transitionDuration}ms` }}>
         {children}
       </div>
-      <div className="fixed inset-0 bg-white -z-10"></div>
+      
     </PageTransitionContext.Provider>
   );
 };
@@ -122,8 +185,8 @@ const Home = () => {
 const FurniturePage = () => (
   <LayoutWrapper>
     <Navigation />
-    <div className="flex justify-start pt-28 pl-8">
-      <div className="flex flex-col items-start gap-12 max-w-xl pb-16">
+    <div className="flex justify-center pt-28">
+      <div className="flex flex-col items-center gap-12 max-w-xl pb-16">
         {furnitureList.map((item) => (
           <TransitionLink to={`/furniture/${item.id}`} key={item.id}>
             <div className="relative w-80 group">
@@ -151,7 +214,7 @@ const FurnitureDetail = () => {
     <LayoutWrapper>
       <Navigation />
       <div className="max-w-3xl mx-auto w-full pt-28">
-        <div className="flex flex-col items-center justify-center">
+        <div className="flex flex-col items-center">
           {item.images.map((img, idx) => (
             <img
               key={idx}
