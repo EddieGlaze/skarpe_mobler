@@ -240,7 +240,7 @@ const FurniturePage = () => {
           {furnitureList.map((item) => (
             <TransitionLink to={`/furniture/${item.id}`} key={item.id}>
               <div className="relative w-80 group mx-auto">
-                <div className="absolute inset-0 bg-gradient-to-b from-white/50 to-white/30 group-hover:opacity-0 transition-opacity duration-300"></div>
+                <div className="absolute inset-0 bg-gradient-to-b from-white/70 to-white/30 group-hover:opacity-0 transition-opacity duration-300"></div>
                 <img
                   src={item.images[0]}
                   alt={item.name}
