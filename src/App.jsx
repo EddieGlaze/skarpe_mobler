@@ -171,7 +171,7 @@ const Navigation = () => {
         }}
         className="text-4xl font-light mb-2 select-none uppercase"
       >
-        Skarpe Møbler
+        Studio Glazebrook
       </a>
       <nav className="flex justify-center w-full max-w-md text-lg font-light">
         <TransitionLink to="/furniture" className="hover:underline text-center">
@@ -206,7 +206,7 @@ const Home = () => {
               href="/" 
               className="text-5xl font-light mb-6 block text-white uppercase font-['Courier_New',_monospace]"
             >
-              Skarpe Møbler
+              Studio Glazebrook
             </a>
           </div>
           <div className="flex justify-center w-full mt-6">
@@ -240,7 +240,7 @@ const FurniturePage = () => {
           {furnitureList.map((item) => (
             <TransitionLink to={`/furniture/${item.id}`} key={item.id}>
               <div className="relative w-80 group mx-auto">
-                <div className="absolute inset-0 bg-gradient-to-b from-white/70 to-white/30 group-hover:opacity-0 transition-opacity duration-300"></div>
+                <div className="absolute inset-0 bg-gradient-to-b from-white/90 to-white/30 group-hover:opacity-0 transition-opacity duration-300"></div>
                 <img
                   src={item.images[0]}
                   alt={item.name}
