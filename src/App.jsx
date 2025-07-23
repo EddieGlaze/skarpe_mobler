@@ -86,6 +86,55 @@ const furnitureList = [
   },
 ];
 
+const projectsList = [
+  {
+    id: "project1",
+    name: "Campus Remarkable",
+    images: [
+      `${import.meta.env.BASE_URL}images/projects/remarkable/remarkable-1.jpg`,
+      `${import.meta.env.BASE_URL}images/projects/remarkable/remarkable-2.png`,
+      `${import.meta.env.BASE_URL}images/projects/remarkable/remarkable-3.png`,
+    ],
+  },
+  {
+    id: "project2",
+    name: "Filipstad Brygge 1",
+    images: [
+      `${import.meta.env.BASE_URL}images/projects/filipstad/filipstad-1.png`,
+      `${import.meta.env.BASE_URL}images/projects/filipstad/filipstad-2.png`,
+      `${import.meta.env.BASE_URL}images/projects/filipstad/filipstad-3.png`,
+    ],
+  },
+];
+
+const drawingsList = [
+  {
+    id: "drawing1",
+    name: "Blomst",
+    images: [
+      `${import.meta.env.BASE_URL}images/drawings/blomst/blomst-1.jpg`,
+      `${import.meta.env.BASE_URL}images/drawings/blomst/blomst-2.jpg`,
+    ],
+  },
+  {
+    id: "drawing2",
+    name: "Kvinne",
+    images: [
+      `${import.meta.env.BASE_URL}images/drawings/kvinne/kvinne-1.jpg`,
+      `${import.meta.env.BASE_URL}images/drawings/kvinne/kvinne-2.jpg`,
+    ],
+  },
+  {
+    id: "drawing2",
+    name: "Uteplass",
+    images: [
+      `${import.meta.env.BASE_URL}images/drawings/uteplass/uteplass-1.jpg`,
+      `${import.meta.env.BASE_URL}images/drawings/uteplass/uteplass-2.jpg`,
+      `${import.meta.env.BASE_URL}images/drawings/uteplass/uteplass-3.jpg`,
+    ],
+  },
+];
+
 const PageTransitionContext = React.createContext();
 const transitionDuration = 600;
 
@@ -147,9 +196,15 @@ const Navigation = () => {
         Studio Glazebrook
       </a>
       <span className="text-sm font-light">Contact: edvard@glazebrook.com | +47 123 45 678</span>
-      <nav className="flex justify-start w-full max-w-md text-lg font-light mt-2">
+      <nav className="flex justify-start w-full max-w-md text-lg font-light mt-2 space-x-6">
         <TransitionLink to="/furniture" className="hover:underline text-left">
           Furniture
+        </TransitionLink>
+        <TransitionLink to="/projects" className="hover:underline text-left">
+          Projects
+        </TransitionLink>
+        <TransitionLink to="/drawings" className="hover:underline text-left">
+          Drawings
         </TransitionLink>
       </nav>
     </div>
@@ -158,7 +213,7 @@ const Navigation = () => {
 
 const Footer = () => (
   <footer className="w-full py-12 px-8 text-left mt-16 font-['Courier_New',_monospace] text-gray-600">
-    <p className="font-light">Contact: edvard@glazebrook.com | +47 123 45 678</p>
+    {/* Contact line removed */}
   </footer>
 );
 
@@ -171,9 +226,15 @@ const Home = () => {
         <div className="absolute top-0 left-0 w-full pt-8 pl-8 text-left">
           <a href="/" className="text-5xl font-light mb-1 block text-white uppercase font-['Courier_New',_monospace]">Studio Glazebrook</a>
           <span className="text-sm font-light text-white">Contact: edvard@glazebrook.com | +47 123 45 678</span>
-          <div className="mt-6">
+          <div className="mt-6 flex space-x-6">
             <a href="/furniture" onClick={(e) => { e.preventDefault(); navigateWithTransition('/furniture'); }} className="hover:underline text-white text-xl font-light">
               Furniture
+            </a>
+            <a href="/projects" onClick={(e) => { e.preventDefault(); navigateWithTransition('/projects'); }} className="hover:underline text-white text-xl font-light">
+              Projects
+            </a>
+            <a href="/drawings" onClick={(e) => { e.preventDefault(); navigateWithTransition('/drawings'); }} className="hover:underline text-white text-xl font-light">
+              Drawings
             </a>
           </div>
         </div>
@@ -238,11 +299,125 @@ const FurnitureDetail = () => {
   );
 };
 
+const ProjectsPage = () => (
+  <LayoutWrapper>
+    <Navigation />
+    <div className="flex justify-center pt-28">
+      <div className="flex flex-col items-center gap-12 max-w-xl pb-16">
+        {projectsList.map((item) => (
+          <TransitionLink to={`/projects/${item.id}`} key={item.id}>
+            <div className="relative w-80 group">
+              <div className="absolute inset-0 bg-gradient-to-b from-white/90 to-white/30 group-hover:opacity-0 transition-opacity duration-300"></div>
+              <img src={item.images[0]} alt={item.name} className="w-full h-auto object-cover" />
+              <div className="mt-2 text-left opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <h2 className="text-sm font-light text-gray-600">{item.name}</h2>
+              </div>
+            </div>
+          </TransitionLink>
+        ))}
+      </div>
+    </div>
+  </LayoutWrapper>
+);
+
+const ProjectDetail = () => {
+  const { id } = useParams();
+  const item = projectsList.find((p) => p.id === id);
+
+  if (!item) return <div className="p-6 text-left font-light text-gray-600">Project not found</div>;
+  
+  return (
+    <LayoutWrapper>
+      <Navigation />
+      <div className="max-w-3xl mx-auto w-full pt-28">
+        <div className="flex flex-col items-center">
+          {item.images.map((img, idx) => (
+            <img
+              key={idx}
+              src={img}
+              alt={`${item.name} ${idx + 1}`}
+              className="mb-8"
+              style={{ width: '50vw', margin: '0 auto' }}
+            />
+          ))}
+          <h1 className="text-3xl font-light mb-2 text-gray-600 text-left w-full">{item.name}</h1>
+          <p className="mb-6 font-light text-gray-600 text-left w-full">For inquiries about this project, please click below:</p>
+          <a
+            href={`mailto:edvard@glazebrook.com?subject=Request about ${item.name}`}
+            className="inline-block bg-gray-400 text-white px-6 py-3 hover:bg-gray-700 transition font-light"
+          >
+            Request more information
+          </a>
+        </div>
+      </div>
+    </LayoutWrapper>
+  );
+};
+
+const DrawingsPage = () => (
+  <LayoutWrapper>
+    <Navigation />
+    <div className="flex justify-center pt-28">
+      <div className="flex flex-col items-center gap-12 max-w-xl pb-16">
+        {drawingsList.map((item) => (
+          <TransitionLink to={`/drawings/${item.id}`} key={item.id}>
+            <div className="relative w-80 group">
+              <div className="absolute inset-0 bg-gradient-to-b from-white/90 to-white/30 group-hover:opacity-0 transition-opacity duration-300"></div>
+              <img src={item.images[0]} alt={item.name} className="w-full h-auto object-cover" />
+              <div className="mt-2 text-left opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <h2 className="text-sm font-light text-gray-600">{item.name}</h2>
+              </div>
+            </div>
+          </TransitionLink>
+        ))}
+      </div>
+    </div>
+  </LayoutWrapper>
+);
+
+const DrawingDetail = () => {
+  const { id } = useParams();
+  const item = drawingsList.find((d) => d.id === id);
+
+  if (!item) return <div className="p-6 text-left font-light text-gray-600">Drawing not found</div>;
+  
+  return (
+    <LayoutWrapper>
+      <Navigation />
+      <div className="max-w-3xl mx-auto w-full pt-28">
+        <div className="flex flex-col items-center">
+          {item.images.map((img, idx) => (
+            <img
+              key={idx}
+              src={img}
+              alt={`${item.name} ${idx + 1}`}
+              className="mb-8"
+              style={{ width: '50vw', margin: '0 auto' }}
+            />
+          ))}
+          <h1 className="text-3xl font-light mb-2 text-gray-600 text-left w-full">{item.name}</h1>
+          <p className="mb-6 font-light text-gray-600 text-left w-full">For inquiries about this drawing, please click below:</p>
+          <a
+            href={`mailto:edvard@glazebrook.com?subject=Request about ${item.name}`}
+            className="inline-block bg-gray-400 text-white px-6 py-3 hover:bg-gray-700 transition font-light"
+          >
+            Request more information
+          </a>
+        </div>
+      </div>
+    </LayoutWrapper>
+  );
+};
+
 const AppContent = () => (
   <Routes>
     <Route path="/" element={<Home />} />
     <Route path="/furniture" element={<FurniturePage />} />
     <Route path="/furniture/:id" element={<FurnitureDetail />} />
+    <Route path="/projects" element={<ProjectsPage />} />
+    <Route path="/projects/:id" element={<ProjectDetail />} />
+    <Route path="/drawings" element={<DrawingsPage />} />
+    <Route path="/drawings/:id" element={<DrawingDetail />} />
   </Routes>
 );
 
