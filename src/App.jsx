@@ -90,7 +90,7 @@ const furnitureList = [
 const PageTransitionContext = React.createContext();
 
 // Define transition durations in one place for consistency
-const transitionDuration = 400; // 1.2 seconds for a slower fade
+const transitionDuration = 600; // 1.2 seconds for a slower fade
 
 const PageTransitionProvider = ({ children }) => {
   const [isTransitioning, setIsTransitioning] = useState(false);
