@@ -24,10 +24,13 @@ const furnitureList = [
     id: "shelf1",
     name: "Skarp Hylle",
     images: [
-      `${import.meta.env.BASE_URL}images/shelf/shelf-1.JPEG`,
-      `${import.meta.env.BASE_URL}images/shelf/shelf-2.JPEG`,
-      `${import.meta.env.BASE_URL}images/shelf/shelf-3.JPEG`,
-      `${import.meta.env.BASE_URL}images/shelf/shelf-4.JPEG`,
+      `${import.meta.env.BASE_URL}images/hylle_a/Hylle_A_1.jpg`,
+      `${import.meta.env.BASE_URL}images/hylle_a/Hylle_A_2.jpg`,
+      `${import.meta.env.BASE_URL}images/hylle_a/Hylle_A_3.jpg`,
+      `${import.meta.env.BASE_URL}images/hylle_a/Hylle_A_4.jpg`,
+      `${import.meta.env.BASE_URL}images/hylle_a/Hylle_A_5.jpg`,
+      `${import.meta.env.BASE_URL}images/hylle_a/Hylle_A_6.jpg`,
+      `${import.meta.env.BASE_URL}images/hylle_a/Hylle_A_7.jpg`,
     ],
   },
   {
