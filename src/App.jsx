@@ -215,7 +215,7 @@ const Home = () => {
     <LayoutWrapper isHomePage={true}>
       <div className="relative w-full h-screen">
         <img src={`${import.meta.env.BASE_URL}images/frontpage_images/all-1.JPEG`} alt="Industrial Furniture" className="w-full h-full object-cover" />
-        <div className="absolute top-0 left-0 w-full pt-4 sm:pt-8 text-left">
+        <div className="absolute top-0 left-0 w-full pt-4 sm:pt-8 px-4 sm:px-6 md:px-8 text-left">
           <a href="/" className="block text-3xl sm:text-4xl md:text-5xl font-light mb-1 text-white uppercase font-['Courier_New',_monospace]">Studio Glazebrook</a>
           <span className="text-xs sm:text-sm font-light text-white">Contact: edvard@glazebrook.com | +47 123 45 678</span>
           <div className="mt-4 sm:mt-6 flex gap-4 sm:gap-6">
