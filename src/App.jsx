@@ -676,7 +676,7 @@ const Carousel = ({ images, name, onOpenLightbox }) => {
               className="w-24 h-16 object-cover block"
               capWidth={512}
               pixelRatioMultiplier={2.0}
-              spinner={false}   {/* no spinner on thumbs */}
+              spinner={false}
             />
           </button>
         ))}
