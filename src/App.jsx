@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { BrowserRouter as Router, Route, Routes, useParams, useNavigate, Navigate } from "react-router-dom";
 
 /**
  * DATA
  * (Only Furniture is active. Projects/Drawings removed.)
+ * For captions, we auto-generate "«Name» – Bilde N" if no explicit caption list exists.
  */
 const furnitureList = [
   { id: "table1", name: "Skarpt Bord", images: [
@@ -85,7 +86,7 @@ const PageTransitionProvider = ({ children }) => {
   return (
     <PageTransitionContext.Provider value={{ isTransitioning, navigateWithTransition }}>
       <div
-        className={`transition-opacity ease-in-out`}
+        className="transition-opacity ease-in-out"
         style={{ opacity: isTransitioning ? 0 : 1, transitionDuration: `${transitionDuration}ms` }}
       >
         {children}
@@ -137,8 +138,8 @@ const usePrefersReducedMotion = () => {
   return reduced;
 };
 
-// --- Intersection ratios (0..1) for each tile ---
-const buildThresholds = (steps = 20) =>
+// --- Visibility ratios (0..1) for each tile (continuous; no thresholds) ---
+const buildThresholds = (steps = 24) =>
   Array.from({ length: steps + 1 }, (_, i) => i / steps);
 
 const useVisibilityRatios = (itemRefs) => {
@@ -163,7 +164,7 @@ const useVisibilityRatios = (itemRefs) => {
           });
         }
       },
-      { threshold: buildThresholds(16) }
+      { threshold: buildThresholds(24) }
     );
 
     itemRefs.current.forEach((el, idx) => {
@@ -176,61 +177,6 @@ const useVisibilityRatios = (itemRefs) => {
   }, [itemRefs]);
 
   return ratiosState;
-};
-
-// --- Rock-solid focus: EMA + debounce + margin (touch only) ---
-const useStableFocus = (ratios, itemCount) => {
-  const isTouch = useIsTouch();
-  const [focusIndex, setFocusIndex] = useState(-1);
-
-  const scoresRef = useRef([]);
-  const lastSwitchRef = useRef(0);
-
-  useEffect(() => {
-    if (!isTouch || !ratios || ratios.length === 0) return;
-
-    // init scores
-    if (scoresRef.current.length !== itemCount) {
-      scoresRef.current = new Array(itemCount).fill(0);
-      setFocusIndex((prev) => (prev === -1 ? 0 : prev));
-      lastSwitchRef.current = performance.now();
-    }
-
-    const alpha = 0.22;          // smoothing strength (higher = more reactive)
-    const margin = 0.10;         // candidate must beat current by 10%
-    const minInterval = 180;     // ms between switches
-
-    // update EMA scores
-    for (let i = 0; i < itemCount; i++) {
-      const r = ratios[i] ?? 0;
-      scoresRef.current[i] = (1 - alpha) * scoresRef.current[i] + alpha * r;
-    }
-
-    // find best score
-    let bestIdx = 0;
-    let best = -1;
-    for (let i = 0; i < itemCount; i++) {
-      if (scoresRef.current[i] > best) {
-        best = scoresRef.current[i];
-        bestIdx = i;
-      }
-    }
-
-    // decide switch
-    const now = performance.now();
-    if (focusIndex === -1) {
-      setFocusIndex(bestIdx);
-      lastSwitchRef.current = now;
-    } else if (
-      now - lastSwitchRef.current > minInterval &&
-      scoresRef.current[bestIdx] > scoresRef.current[focusIndex] + margin
-    ) {
-      setFocusIndex(bestIdx);
-      lastSwitchRef.current = now;
-    }
-  }, [ratios, itemCount, isTouch, focusIndex]);
-
-  return isTouch ? focusIndex : -1;
 };
 
 // --- Layout wrapper ---
@@ -309,58 +255,59 @@ const Home = () => {
   );
 };
 
-// --- Furniture pages (single page scroll + soft snap + stable focus + crossfade) ---
-const GalleryTile = React.memo(function GalleryTile({ src, label, inFocus, visibilityRatio, isTouch, reducedMotion }) {
-  // Subtle crossfade on touch: 0.90 -> 1.0
-  const imgOpacity = reducedMotion
-    ? 1
-    : isTouch
-      ? Math.min(1, 0.90 + 0.10 * (visibilityRatio || 0))
-      : 1;
+/* --------- Furniture Index (list) --------- */
 
-  // Overlay & label behavior:
-  // - Touch: reveal on focus (no hover)
-  // - Desktop: reveal on hover (group-hover)
-  const overlayBase = "absolute inset-0 bg-gradient-to-b from-white/90 to-white/30 transition-opacity duration-300";
-  const labelBase = "mt-2 text-left transition-opacity duration-300";
+// Continuous overlay/label based on ratio (touch); desktop keeps hover reveal
+const GalleryTile = React.memo(function GalleryTile({ src, label, ratio, isTouch, reducedMotion }) {
+  // Smooth mapping: ignore tiny intersections and ease out near 1
+  // t in [0,1], where t=0 before ~20% visible, t=1 at full visibility
+  const t = Math.max(0, Math.min(1, (ratio - 0.2) / 0.6));
+  const eased = reducedMotion ? t : Math.pow(t, 1.6);
 
-  const overlayClass = isTouch
-    ? `${overlayBase} ${inFocus ? 'opacity-0' : 'opacity-100'}`
-    : `${overlayBase} opacity-100 group-hover:opacity-0`;
+  // Touch: overlay fades out with visibility; Desktop: hover controls overlay
+  const overlayOpacity = isTouch ? (1 - eased) : 1;
 
-  const labelClass = isTouch
-    ? `${labelBase} ${inFocus ? 'opacity-100' : 'opacity-0'}`
-    : `${labelBase} opacity-0 group-hover:opacity-100`;
+  // Touch: label fades in with visibility; Desktop: label on hover
+  const labelOpacity = isTouch ? eased : 0;
 
   return (
     <div className="relative w-72 sm:w-80 will-change-transform mx-auto">
-      <div className={overlayClass}></div>
+      {/* Overlay */}
+      <div
+        className={`absolute inset-0 bg-gradient-to-b from-white/90 to-white/30 transition-opacity duration-200 ${!isTouch ? 'group-hover:opacity-0' : ''}`}
+        style={isTouch ? { opacity: overlayOpacity } : undefined}
+      />
+      {/* Image */}
       <img
         src={src}
         alt={label}
         className="w-full h-auto object-cover block mx-auto"
         loading="lazy"
         decoding="async"
-        style={{ opacity: imgOpacity }}
+        // subtle image brightening as it becomes visible on touch
+        style={isTouch && !reducedMotion ? { opacity: 0.9 + 0.1 * eased } : undefined}
       />
-      <div className={labelClass}>
+      {/* Label */}
+      <div
+        className={`mt-2 text-left transition-opacity duration-200 ${!isTouch ? 'opacity-0 group-hover:opacity-100' : ''}`}
+        style={isTouch ? { opacity: labelOpacity } : undefined}
+      >
         <h2 className="text-center sm:text-left text-sm font-light text-gray-600">{label}</h2>
       </div>
     </div>
   );
 });
 
-function ListWithFocus({ items, basePath }) {
+function ListWithContinuousReveal({ items, basePath }) {
   const isTouch = useIsTouch();
   const reducedMotion = usePrefersReducedMotion();
 
-  // Item refs for observers/measurements
+  // Item refs for IO
   const itemRefs = useRef([]);
   itemRefs.current = useMemo(() => new Array(items.length).fill(null), [items.length]);
 
-  // Visibility (for crossfade), then stable focus (EMA + debounce + margin)
+  // Continuous visibility ratios (0..1)
   const ratios = useVisibilityRatios(itemRefs);
-  const focusIndex = useStableFocus(ratios, items.length);
 
   return (
     <div className="w-full flex justify-center pt-28">
@@ -369,14 +316,13 @@ function ListWithFocus({ items, basePath }) {
           <TransitionLink to={`${basePath}/${item.id}`} key={item.id}>
             <div
               ref={(el) => (itemRefs.current[idx] = el)}
-              className={isTouch ? "snap-center" : ""}
-              style={isTouch ? { scrollMarginTop: "6rem", scrollMarginBottom: "6rem", scrollSnapStop: "normal" } : undefined}
+              style={{ scrollMarginTop: "6rem", scrollMarginBottom: "6rem" }}
+              className="group"
             >
               <GalleryTile
                 src={item.images[0]}
                 label={item.name}
-                inFocus={focusIndex === idx}
-                visibilityRatio={ratios?.[idx] ?? 0}
+                ratio={ratios?.[idx] ?? 0}
                 isTouch={isTouch}
                 reducedMotion={reducedMotion}
               />
@@ -388,12 +334,11 @@ function ListWithFocus({ items, basePath }) {
   );
 }
 
-const FurniturePage = () => {
-  const isTouch = useIsTouch();
-  const reducedMotion = usePrefersReducedMotion();
+// Renamed to avoid redeclaration conflicts
+const FurnitureIndexPage = React.memo(function FurnitureIndexPage() {
   const [scrolled, setScrolled] = useState(false);
 
-  // Page-level soft snap on touch, and glass nav on scroll
+  // Glass nav after small scroll
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
     onScroll();
@@ -401,30 +346,171 @@ const FurniturePage = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  useEffect(() => {
-    if (!isTouch || reducedMotion) return;
-
-    const root = document.documentElement;
-    const prevSnapType = root.style.scrollSnapType;
-    const prevPadTop = root.style.scrollPaddingTop;
-    const prevPadBottom = root.style.scrollPaddingBottom;
-
-    root.style.scrollSnapType = "y proximity"; // softer snap
-    root.style.scrollPaddingTop = "6rem";      // account for fixed nav
-    root.style.scrollPaddingBottom = "6rem";
-
-    return () => {
-      root.style.scrollSnapType = prevSnapType || "";
-      root.style.scrollPaddingTop = prevPadTop || "";
-      root.style.scrollPaddingBottom = prevPadBottom || "";
-    };
-  }, [isTouch, reducedMotion]);
-
   return (
     <LayoutWrapper>
       <Navigation glass glassActive={scrolled} />
-      <ListWithFocus items={furnitureList} basePath="/furniture" />
+      <ListWithContinuousReveal items={furnitureList} basePath="/furniture" />
     </LayoutWrapper>
+  );
+});
+
+/* --------- Furniture Detail (carousel) --------- */
+
+function useSwipe(onLeft, onRight) {
+  const startX = useRef(0);
+  const startY = useRef(0);
+  const tracking = useRef(false);
+
+  const onTouchStart = (e) => {
+    if (!e.touches || e.touches.length !== 1) return;
+    tracking.current = true;
+    startX.current = e.touches[0].clientX;
+    startY.current = e.touches[0].clientY;
+  };
+  const onTouchMove = (e) => {
+    if (!tracking.current) return;
+    const dx = e.touches[0].clientX - startX.current;
+    const dy = e.touches[0].clientY - startY.current;
+    // allow vertical scroll
+    if (Math.abs(dy) > Math.abs(dx) * 1.2) {
+      tracking.current = false;
+    }
+  };
+  const onTouchEnd = (e) => {
+    if (!tracking.current) return;
+    tracking.current = false;
+    const touch = e.changedTouches && e.changedTouches[0];
+    if (!touch) return;
+    const dx = touch.clientX - startX.current;
+    const threshold = 40;
+    if (dx <= -threshold) onLeft?.();
+    else if (dx >= threshold) onRight?.();
+  };
+  return { onTouchStart, onTouchMove, onTouchEnd };
+}
+
+const Carousel = ({ images, name }) => {
+  const [idx, setIdx] = useState(0);
+  const [fit, setFit] = useState("contain"); // 'contain' | 'cover'
+  const total = images.length;
+
+  const go = useCallback((n) => {
+    setIdx((cur) => (cur + n + total) % total);
+  }, [total]);
+
+  const goTo = (i) => setIdx(i);
+
+  // Captions: use defaults if none provided
+  const captions = useMemo(
+    () => images.map((_, i) => `${name} – Bilde ${i + 1}`),
+    [images, name]
+  );
+
+  // Keyboard left/right on container
+  const wrapRef = useRef(null);
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const onKey = (e) => {
+      if (e.key === "ArrowLeft") go(-1);
+      else if (e.key === "ArrowRight") go(1);
+    };
+    el.addEventListener("keydown", onKey);
+    return () => el.removeEventListener("keydown", onKey);
+  }, [go]);
+
+  const { onTouchStart, onTouchMove, onTouchEnd } = useSwipe(() => go(1), () => go(-1));
+
+  return (
+    <div ref={wrapRef} tabIndex={0} className="w-full max-w-3xl mx-auto outline-none select-none">
+      {/* Controls row */}
+      <div className="flex items-center justify-between mb-2">
+        <div className="text-sm text-gray-600">{idx + 1} / {total}</div>
+        <button
+          type="button"
+          onClick={() => setFit((f) => (f === "contain" ? "cover" : "contain"))}
+          className="text-sm px-3 py-1.5 border border-gray-300 rounded-md hover:bg-gray-50"
+          aria-pressed={fit === "cover"}
+          aria-label={fit === "cover" ? "Bytt til tilpass" : "Bytt til fyll"}
+          title={fit === "cover" ? "Tilpass" : "Fyll"}
+        >
+          {fit === "cover" ? "Tilpass" : "Fyll"}
+        </button>
+      </div>
+
+      {/* Stage */}
+      <div
+        className="relative w-full aspect-[4/3] bg-white border border-gray-200 rounded-xl overflow-hidden"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        aria-roledescription="karusell"
+      >
+        {/* Slides */}
+        <div
+          className="w-full h-full flex transition-transform duration-500 ease-out"
+          style={{ transform: `translateX(-${idx * 100}%)` }}
+          aria-live="polite"
+        >
+          {images.map((src, i) => (
+            <div key={i} className="w-full h-full shrink-0 flex items-center justify-center p-2">
+              <img
+                src={src}
+                alt={`${name} – bilde ${i + 1}`}
+                className={`max-w-full max-h-full block ${fit === "contain" ? "object-contain" : "object-cover w-full h-full"}`}
+                loading={i === idx ? "eager" : "lazy"}
+                decoding="async"
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* Arrows */}
+        <button
+          type="button"
+          aria-label="Forrige"
+          onClick={() => go(-1)}
+          className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white/90 rounded-full w-10 h-10 flex items-center justify-center shadow"
+        >
+          ‹
+        </button>
+        <button
+          type="button"
+          aria-label="Neste"
+          onClick={() => go(1)}
+          className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white/90 rounded-full w-10 h-10 flex items-center justify-center shadow"
+        >
+          ›
+        </button>
+
+        {/* Caption overlay */}
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-white/90 to-white/0 p-3">
+          <div className="text-center text-sm text-gray-800">{captions[idx]}</div>
+        </div>
+      </div>
+
+      {/* Thumbnails */}
+      <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
+        {images.map((src, i) => (
+          <button
+            type="button"
+            key={i}
+            aria-label={`Bilde ${i + 1}`}
+            onClick={() => goTo(i)}
+            className={`shrink-0 border ${i === idx ? 'border-gray-700' : 'border-gray-300'} rounded-md p-0.5`}
+            title={captions[i]}
+          >
+            <img
+              src={src}
+              alt=""
+              className="block h-16 w-24 object-cover"
+              loading="lazy"
+              decoding="async"
+            />
+          </button>
+        ))}
+      </div>
+    </div>
   );
 };
 
@@ -432,24 +518,24 @@ const FurnitureDetail = () => {
   const { id } = useParams();
   const item = furnitureList.find((f) => f.id === id);
   if (!item) return <div className="p-6 text-left font-light text-gray-600">Furniture not found</div>;
+
   return (
     <LayoutWrapper>
       <Navigation glass glassActive />
       <div className="mx-auto w-full pt-28 px-4 sm:px-6 md:px-8 max-w-3xl">
         <div className="flex flex-col items-center">
-          {item.images.map((img, idx) => (
-            <img
-              key={idx}
-              src={img}
-              alt={`${item.name} ${idx + 1}`}
-              className="mb-6 sm:mb-8 w-full max-w-3xl object-contain block mx-auto"
-              loading="lazy"
-              decoding="async"
-            />
-          ))}
-          <h1 className="text-2xl sm:text-3xl font-light mb-2 text-gray-600 text-left w-full">{item.name}</h1>
-          <p className="mb-6 font-light text-gray-600 text-left w-full text-sm sm:text-base">For inquiries about this piece, please click below:</p>
-          <a href={`mailto:hannahjelmeland@gmail.com?subject=Request about ${item.name}`} className="inline-block bg-gray-400 text-white px-4 sm:px-6 py-2.5 sm:py-3 hover:bg-gray-700 transition font-light text-sm sm:text-base">Request this furniture</a>
+          <Carousel images={item.images} name={item.name} />
+
+          <h1 className="text-2xl sm:text-3xl font-light mt-6 mb-2 text-gray-600 text-left w-full">{item.name}</h1>
+          <p className="mb-4 font-light text-gray-600 text-left w-full text-sm sm:text-base">
+            Ønsker du mer informasjon eller å gå videre? Trykk under:
+          </p>
+          <a
+            href={`mailto:hannahjelmeland@gmail.com?subject=Interesse for ${encodeURIComponent(item.name)}`}
+            className="self-start inline-block bg-gray-700 text-white px-5 py-3 rounded-md hover:bg-gray-800 transition font-light text-sm sm:text-base"
+          >
+            Vis interesse
+          </a>
         </div>
       </div>
     </LayoutWrapper>
@@ -460,7 +546,7 @@ const FurnitureDetail = () => {
 const AppContent = () => (
   <Routes>
     <Route path="/" element={<Home />} />
-    <Route path="/furniture" element={<FurniturePage />} />
+    <Route path="/furniture" element={<FurnitureIndexPage />} />
     <Route path="/furniture/:id" element={<FurnitureDetail />} />
     <Route path="*" element={<Navigate to="/" replace />} />
   </Routes>
