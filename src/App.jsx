@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { BrowserRouter as Router, Route, Routes, useParams, useNavigate, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, useParams, useNavigate, Navigate, useLocation } from "react-router-dom";
 
 /**
  * DATA
@@ -107,6 +107,18 @@ const TransitionLink = ({ to, children, className = "" }) => {
   );
 };
 
+// --- Scroll to top on route change (fix landing at bottom) ---
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [pathname]);
+  return null;
+}
+
 // --- Helpers ---
 const useIsTouch = () => {
   const [isTouch, setIsTouch] = useState(() =>
@@ -173,7 +185,7 @@ const Home = () => {
         <img
           src={`${import.meta.env.BASE_URL}images/frontpage_images/all-1.JPEG`}
           alt="Industrial Furniture"
-          className="w-full h-full object-cover block"
+        className="w-full h-full object-cover block"
         />
         <div className="absolute top-0 left-0 w-full pt-4 sm:pt-8 px-4 sm:px-6 md:px-8 text-left">
           <a href="/" className="block text-3xl sm:text-4xl md:text-5xl font-light mb-1 text-white uppercase font-['Courier_New',_monospace]">Studio Glazebrook</a>
@@ -202,7 +214,7 @@ const Home = () => {
 
 /* --------- Furniture Index (simple, flicker-free) --------- */
 // Mobile: no overlay/fade at all.
-// Desktop: steady overlay that fades away on hover.
+// Desktop: overlay fades only on hover.
 
 const GalleryTile = React.memo(function GalleryTile({ src, label }) {
   const isTouch = useIsTouch();
@@ -314,7 +326,6 @@ const Carousel = ({ images, name }) => {
   const { onTouchStart, onTouchMove, onTouchEnd } = useSwipe(() => go(1), () => go(-1));
 
   // Thumbnails "follow": keep active thumb centered/visible
-  const thumbStripRef = useRef(null);
   const thumbRefs = useRef([]);
   useEffect(() => {
     const el = thumbRefs.current[idx];
@@ -371,7 +382,7 @@ const Carousel = ({ images, name }) => {
       </div>
 
       {/* Thumbnails: rectangular; active border; auto-follow */}
-      <div ref={thumbStripRef} className="mt-4 flex gap-2 overflow-x-auto pb-1">
+      <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
         {images.map((src, i) => (
           <button
             type="button"
@@ -418,6 +429,22 @@ const FurnitureDetail = () => {
           >
             Vis interesse
           </a>
+
+          {/* Produktdetaljer (expandable) */}
+          <details className="w-full border border-gray-300 mt-4">
+            <summary className="cursor-pointer select-none px-4 py-3 text-gray-800">
+              Produktdetaljer
+            </summary>
+            <div className="px-4 pb-4 pt-2 text-sm text-gray-700">
+              <ul className="list-disc pl-5 space-y-1">
+                <li>Dimensjoner: Dybde x cm, Bredde x cm, Høyde x cm</li>
+                <li>Materiale: Massivt tre / Stål / Annet</li>
+                <li>Finish: Oljet / Lakkert / Naturlig</li>
+                <li>Tilpasning: Mulig på forespørsel (mål, finish)</li>
+                <li>Vedlikehold: Tørk av med fuktig klut</li>
+              </ul>
+            </div>
+          </details>
         </div>
       </div>
     </LayoutWrapper>
@@ -445,6 +472,7 @@ export default function App() {
 function AppWithTransition() {
   return (
     <PageTransitionProvider>
+      <ScrollToTop />
       <AppContent />
     </PageTransitionProvider>
   );
