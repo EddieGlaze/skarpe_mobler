@@ -185,7 +185,7 @@ const Home = () => {
         <img
           src={`${import.meta.env.BASE_URL}images/frontpage_images/all-1.JPEG`}
           alt="Industrial Furniture"
-        className="w-full h-full object-cover block"
+          className="w-full h-full object-cover block"
         />
         <div className="absolute top-0 left-0 w-full pt-4 sm:pt-8 px-4 sm:px-6 md:px-8 text-left">
           <a href="/" className="block text-3xl sm:text-4xl md:text-5xl font-light mb-1 text-white uppercase font-['Courier_New',_monospace]">Studio Glazebrook</a>
@@ -420,9 +420,8 @@ const FurnitureDetail = () => {
           <Carousel images={item.images} name={item.name} />
 
           <h1 className="text-2xl sm:text-3xl font-light mt-6 mb-2 text-gray-600 text-left w-full">{item.name}</h1>
-          <p className="mb-4 font-light text-gray-600 text-left w-full text-sm sm:text-base">
-            Estimert leveringstid: 4-6 uker. Pris på forespørsel.
-          </p>
+
+          {/* Vis interesse button stays visible */}
           <a
             href={`mailto:hannahjelmeland@gmail.com?subject=Interesse for ${encodeURIComponent(item.name)}`}
             className="self-start inline-block bg-gray-700 text-white px-5 py-3 hover:bg-gray-800 transition font-light text-sm sm:text-base"
@@ -430,12 +429,16 @@ const FurnitureDetail = () => {
             Vis interesse
           </a>
 
-          {/* Produktdetaljer (expandable) */}
-          <details className="w-full border border-gray-300 mt-4">
-            <summary className="cursor-pointer select-none px-4 py-3 text-gray-800">
-              Produktdetaljer
+          {/* Produktdetaljer (blend-in, no box/border; Estimert tekst moved inside on top) */}
+          <details className="w-full mt-4 group">
+            <summary className="cursor-pointer select-none text-gray-800 flex items-center gap-2 px-0 py-2">
+              <span className="inline-block w-3 transform transition-transform duration-200 group-open:rotate-90">›</span>
+              <span className="underline-offset-2 hover:underline">Produktdetaljer</span>
             </summary>
-            <div className="px-4 pb-4 pt-2 text-sm text-gray-700">
+            <div className="pl-5 pt-1 pb-2 text-sm text-gray-700 space-y-3">
+              <p className="text-gray-700">
+                Estimert leveringstid: 4–6 uker. Pris på forespørsel.
+              </p>
               <ul className="list-disc pl-5 space-y-1">
                 <li>Dimensjoner: Dybde x cm, Bredde x cm, Høyde x cm</li>
                 <li>Materiale: Massivt tre / Stål / Annet</li>
