@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
-import { BrowserRouter as Router, Route, Routes, useParams, useNavigate } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, useParams, useNavigate, Navigate } from "react-router-dom";
 
+/**
+ * DATA
+ * (Only Furniture is active. Projects/Drawings removed.)
+ */
 const furnitureList = [
   { id: "table1", name: "Skarpt Bord", images: [
     `${import.meta.env.BASE_URL}images/table/table-1.JPEG`,
@@ -53,35 +57,7 @@ const furnitureList = [
   ]},
 ];
 
-const projectsList = [
-  { id: "project1", name: "Campus Remarkable", images: [
-    `${import.meta.env.BASE_URL}images/projects/remarkable/remarkable-1.jpg`,
-    `${import.meta.env.BASE_URL}images/projects/remarkable/remarkable-2.png`,
-    `${import.meta.env.BASE_URL}images/projects/remarkable/remarkable-3.png`,
-  ]},
-  { id: "project2", name: "Filipstad Brygge 1", images: [
-    `${import.meta.env.BASE_URL}images/projects/filipstad/filipstad-1.png`,
-    `${import.meta.env.BASE_URL}images/projects/filipstad/filipstad-2.png`,
-    `${import.meta.env.BASE_URL}images/projects/filipstad/filipstad-3.png`,
-  ]},
-];
-
-const drawingsList = [
-  { id: "drawing1", name: "Blomst", images: [
-    `${import.meta.env.BASE_URL}images/drawings/blomst/blomst-1.jpg`,
-    `${import.meta.env.BASE_URL}images/drawings/blomst/blomst-2.jpg`,
-  ]},
-  { id: "drawing2", name: "Kvinne", images: [
-    `${import.meta.env.BASE_URL}images/drawings/kvinne/kvinne-1.jpg`,
-    `${import.meta.env.BASE_URL}images/drawings/kvinne/kvinne-2.jpg`,
-  ]},
-  { id: "drawing2b", name: "Uteplass", images: [
-    `${import.meta.env.BASE_URL}images/drawings/uteplass/uteplass-1.jpg`,
-    `${import.meta.env.BASE_URL}images/drawings/uteplass/uteplass-2.jpg`,
-    `${import.meta.env.BASE_URL}images/drawings/uteplass/uteplass-3.jpg`,
-  ]},
-];
-
+// --- Page transition context ---
 const PageTransitionContext = React.createContext();
 const transitionDuration = 600;
 
@@ -108,7 +84,10 @@ const PageTransitionProvider = ({ children }) => {
 
   return (
     <PageTransitionContext.Provider value={{ isTransitioning, navigateWithTransition }}>
-      <div className={`transition-opacity ease-in-out`} style={{ opacity: isTransitioning ? 0 : 1, transitionDuration: `${transitionDuration}ms` }}>
+      <div
+        className={`transition-opacity ease-in-out`}
+        style={{ opacity: isTransitioning ? 0 : 1, transitionDuration: `${transitionDuration}ms` }}
+      >
         {children}
       </div>
     </PageTransitionContext.Provider>
@@ -130,7 +109,11 @@ const TransitionLink = ({ to, children, className = "" }) => {
 
 // --- Responsive helpers ---
 const useIsTouch = () => {
-  const [isTouch, setIsTouch] = useState(() => (typeof window !== 'undefined' ? window.matchMedia('(hover: none) and (pointer: coarse)').matches : false));
+  const [isTouch, setIsTouch] = useState(() =>
+    (typeof window !== 'undefined'
+      ? window.matchMedia('(hover: none) and (pointer: coarse)').matches
+      : false)
+  );
   useEffect(() => {
     if (typeof window === 'undefined' || !window.matchMedia) return;
     const mq = window.matchMedia('(hover: none) and (pointer: coarse)');
@@ -187,19 +170,22 @@ const LayoutWrapper = ({ children, isHomePage = false }) => (
   </div>
 );
 
-// Navigation: responsive typography + padding; allow wrapping
+// Navigation: Furniture only (Projects/Drawings hidden)
 const Navigation = () => {
   const { navigateWithTransition } = React.useContext(PageTransitionContext);
   return (
     <div className="fixed top-0 left-0 w-full bg-transparent flex flex-col items-start py-3 sm:py-4 z-40 font-['Courier_New',_monospace] text-gray-600 px-4 sm:px-6 md:px-8">
-      <a href="/" onClick={(e) => { e.preventDefault(); navigateWithTransition('/'); }} className="text-2xl sm:text-3xl md:text-4xl font-light mb-1 select-none uppercase">
+      <a
+        href="/"
+        onClick={(e) => { e.preventDefault(); navigateWithTransition('/'); }}
+        className="text-2xl sm:text-3xl md:text-4xl font-light mb-1 select-none uppercase"
+      >
         Studio Glazebrook
       </a>
       <span className="text-xs sm:text-sm font-light break-words pr-2">Contact: edvard@glazebrook.com | +47 123 45 678</span>
       <nav className="flex justify-start w-full max-w-md text-base sm:text-lg font-light mt-2 gap-4 sm:gap-6">
         <TransitionLink to="/furniture" className="hover:underline text-left">Furniture</TransitionLink>
-        <TransitionLink to="/projects" className="hover:underline text-left">Projects</TransitionLink>
-        <TransitionLink to="/drawings" className="hover:underline text-left">Drawings</TransitionLink>
+        {/* Projects and Drawings links removed */}
       </nav>
     </div>
   );
@@ -209,6 +195,7 @@ const Footer = () => (
   <footer className="w-full py-12 px-4 sm:px-6 md:px-8 text-left mt-16 font-['Courier_New',_monospace] text-gray-600" />
 );
 
+// Home: Furniture only (Projects/Drawings links removed)
 const Home = () => {
   const { navigateWithTransition } = React.useContext(PageTransitionContext);
   return (
@@ -219,9 +206,14 @@ const Home = () => {
           <a href="/" className="block text-3xl sm:text-4xl md:text-5xl font-light mb-1 text-white uppercase font-['Courier_New',_monospace]">Studio Glazebrook</a>
           <span className="text-xs sm:text-sm font-light text-white">Contact: edvard@glazebrook.com | +47 123 45 678</span>
           <div className="mt-4 sm:mt-6 flex gap-4 sm:gap-6">
-            <a href="/furniture" onClick={(e) => { e.preventDefault(); navigateWithTransition('/furniture'); }} className="hover:underline text-white text-base sm:text-xl font-light">Furniture</a>
-            <a href="/projects" onClick={(e) => { e.preventDefault(); navigateWithTransition('/projects'); }} className="hover:underline text-white text-base sm:text-xl font-light">Projects</a>
-            <a href="/drawings" onClick={(e) => { e.preventDefault(); navigateWithTransition('/drawings'); }} className="hover:underline text-white text-base sm:text-xl font-light">Drawings</a>
+            <a
+              href="/furniture"
+              onClick={(e) => { e.preventDefault(); navigateWithTransition('/furniture'); }}
+              className="hover:underline text-white text-base sm:text-xl font-light"
+            >
+              Furniture
+            </a>
+            {/* Projects/Drawings buttons removed */}
           </div>
         </div>
       </div>
@@ -229,7 +221,7 @@ const Home = () => {
   );
 };
 
-// Tile that can be forced "in focus" via prop on touch
+// Tile and list components
 function GalleryTile({ src, label, inFocus }) {
   return (
     <div className="relative w-72 sm:w-80">
@@ -243,7 +235,6 @@ function GalleryTile({ src, label, inFocus }) {
   );
 }
 
-// Generic list page with mobile focus-on-scroll
 function ListWithFocus({ items, basePath }) {
   const refs = useRef([]);
   refs.current = [];
@@ -264,6 +255,7 @@ function ListWithFocus({ items, basePath }) {
   );
 }
 
+// Furniture pages (active)
 const FurniturePage = () => (
   <LayoutWrapper>
     <Navigation />
@@ -292,71 +284,20 @@ const FurnitureDetail = () => {
   );
 };
 
-const ProjectsPage = () => (
-  <LayoutWrapper>
-    <Navigation />
-    <ListWithFocus items={projectsList} basePath="/projects" />
-  </LayoutWrapper>
-);
-
-const ProjectDetail = () => {
-  const { id } = useParams();
-  const item = projectsList.find((p) => p.id === id);
-  if (!item) return <div className="p-6 text-left font-light text-gray-600">Project not found</div>;
-  return (
-    <LayoutWrapper>
-      <Navigation />
-      <div className="mx-auto w-full pt-28 px-4 sm:px-6 md:px-8 max-w-3xl">
-        <div className="flex flex-col items-center">
-          {item.images.map((img, idx) => (
-            <img key={idx} src={img} alt={`${item.name} ${idx + 1}`} className="mb-6 sm:mb-8 w-full max-w-3xl object-contain" />
-          ))}
-          <h1 className="text-2xl sm:text-3xl font-light mb-2 text-gray-600 text-left w-full">{item.name}</h1>
-          <p className="mb-6 font-light text-gray-600 text-left w-full text-sm sm:text-base">For inquiries about this project, please click below:</p>
-          <a href={`mailto:edvard@glazebrook.com?subject=Request about ${item.name}`} className="inline-block bg-gray-400 text-white px-4 sm:px-6 py-2.5 sm:py-3 hover:bg-gray-700 transition font-light text-sm sm:text-base">Request more information</a>
-        </div>
-      </div>
-    </LayoutWrapper>
-  );
-};
-
-const DrawingsPage = () => (
-  <LayoutWrapper>
-    <Navigation />
-    <ListWithFocus items={drawingsList} basePath="/drawings" />
-  </LayoutWrapper>
-);
-
-const DrawingDetail = () => {
-  const { id } = useParams();
-  const item = drawingsList.find((d) => d.id === id);
-  if (!item) return <div className="p-6 text-left font-light text-gray-600">Drawing not found</div>;
-  return (
-    <LayoutWrapper>
-      <Navigation />
-      <div className="mx-auto w-full pt-28 px-4 sm:px-6 md:px-8 max-w-3xl">
-        <div className="flex flex-col items-center">
-          {item.images.map((img, idx) => (
-            <img key={idx} src={img} alt={`${item.name} ${idx + 1}`} className="mb-6 sm:mb-8 w-full max-w-3xl object-contain" />
-          ))}
-          <h1 className="text-2xl sm:text-3xl font-light mb-2 text-gray-600 text-left w-full">{item.name}</h1>
-          <p className="mb-6 font-light text-gray-600 text-left w-full text-sm sm:text-base">For inquiries about this drawing, please click below:</p>
-          <a href={`mailto:edvard@glazebrook.com?subject=Request about ${item.name}`} className="inline-block bg-gray-400 text-white px-4 sm:px-6 py-2.5 sm:py-3 hover:bg-gray-700 transition font-light text-sm sm:text-base">Request more information</a>
-        </div>
-      </div>
-    </LayoutWrapper>
-  );
-};
-
+// App routes: only Home and Furniture; anything else redirects to "/"
 const AppContent = () => (
   <Routes>
     <Route path="/" element={<Home />} />
     <Route path="/furniture" element={<FurniturePage />} />
     <Route path="/furniture/:id" element={<FurnitureDetail />} />
+    {/* Deactivated:
     <Route path="/projects" element={<ProjectsPage />} />
     <Route path="/projects/:id" element={<ProjectDetail />} />
     <Route path="/drawings" element={<DrawingsPage />} />
     <Route path="/drawings/:id" element={<DrawingDetail />} />
+    */}
+    {/* Redirect any other paths (including old Projects/Drawings URLs) to Home */}
+    <Route path="*" element={<Navigate to="/" replace />} />
   </Routes>
 );
 
