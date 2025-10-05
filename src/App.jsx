@@ -137,11 +137,11 @@ const usePrefersReducedMotion = () => {
   return reduced;
 };
 
-// Efficient, smooth "focus" detection using IntersectionObserver (touch only)
+// Efficient, smooth "focus" detection using IntersectionObserver (viewport root)
 const buildThresholds = (steps = 20) =>
   Array.from({ length: steps + 1 }, (_, i) => i / steps);
 
-const useFocusByIntersection = (itemRefs, rootRef) => {
+const useFocusByIntersection = (itemRefs) => {
   const isTouch = useIsTouch();
   const [focusIndex, setFocusIndex] = useState(-1);
   const rafLock = useRef(false);
@@ -174,10 +174,7 @@ const useFocusByIntersection = (itemRefs, rootRef) => {
           });
         }
       },
-      {
-        root: rootRef?.current || null,
-        threshold: buildThresholds(16),
-      }
+      { threshold: buildThresholds(16) }
     );
 
     itemRefs.current.forEach((el, idx) => {
@@ -187,9 +184,8 @@ const useFocusByIntersection = (itemRefs, rootRef) => {
     });
 
     return () => observer.disconnect();
-    // itemRefs changes only when list mounts
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isTouch, rootRef]);
+  }, [isTouch]);
 
   return isTouch ? focusIndex : -1;
 };
@@ -266,18 +262,16 @@ const Home = () => {
   );
 };
 
-// --- Furniture pages (smoother scroll) ---
+// --- Furniture pages (single page scroll + softer snapping) ---
 const GalleryTile = React.memo(function GalleryTile({ src, label, inFocus, reducedMotion }) {
-  // Light fade for label; respect reduced motion
-  const baseLabel = "mt-2 text-left transition-opacity duration-300";
+  const baseLabel = "mt-2 text-left transition-opacity";
   const labelClass = reducedMotion
     ? `${baseLabel}`
-    : `${baseLabel} ${inFocus ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`;
+    : `${baseLabel} duration-500 ${inFocus ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`;
 
-  // Soft reveal overlay; respect reduced motion
   const overlayClass = reducedMotion
     ? "absolute inset-0 bg-gradient-to-b from-white/80 to-white/20"
-    : `absolute inset-0 bg-gradient-to-b from-white/90 to-white/30 transition-opacity duration-300 ${inFocus ? 'opacity-0' : 'opacity-100 group-hover:opacity-0'}`;
+    : `absolute inset-0 bg-gradient-to-b from-white/90 to-white/30 transition-opacity duration-500 ${inFocus ? 'opacity-0' : 'opacity-100 group-hover:opacity-0'}`;
 
   return (
     <div className="relative w-72 sm:w-80 will-change-transform">
@@ -300,38 +294,22 @@ function ListWithFocus({ items, basePath }) {
   const isTouch = useIsTouch();
   const reducedMotion = usePrefersReducedMotion();
 
-  // Scroll container ref (root for intersection observer)
-  const scrollerRef = useRef(null);
-
   // Item refs for observer
   const itemRefs = useRef([]);
   itemRefs.current = useMemo(() => new Array(items.length).fill(null), [items.length]);
 
-  // Focus index via IntersectionObserver (touch only)
-  const focusIndex = useFocusByIntersection(itemRefs, scrollerRef);
-
-  // Snap & smooth scrolling only on touch (desktop keeps default page scroll)
-  const snapClasses = isTouch
-    ? "overflow-y-auto snap-y snap-mandatory scroll-smooth"
-    : "";
-
-  // Account for fixed nav (~7rem). Use dynamic viewport height for mobile browsers.
-  const scrollerStyle = isTouch
-    ? { height: "calc(100dvh - 7rem)", scrollPaddingTop: "5rem", scrollPaddingBottom: "5rem" }
-    : {};
+  // Focus index via IntersectionObserver (viewport root)
+  const focusIndex = useFocusByIntersection(itemRefs);
 
   return (
     <div className="flex justify-center pt-28">
-      <div
-        ref={scrollerRef}
-        className={`flex flex-col items-center gap-10 sm:gap-12 max-w-xl pb-16 ${snapClasses}`}
-        style={scrollerStyle}
-      >
+      <div className="flex flex-col items-center gap-14 sm:gap-16 max-w-xl pb-20">
         {items.map((item, idx) => (
           <TransitionLink to={`${basePath}/${item.id}`} key={item.id}>
             <div
               ref={(el) => (itemRefs.current[idx] = el)}
               className={isTouch ? "snap-center" : ""}
+              style={isTouch ? { scrollMarginTop: "6rem", scrollMarginBottom: "6rem" } : undefined}
             >
               <GalleryTile
                 src={item.images[0]}
@@ -347,12 +325,37 @@ function ListWithFocus({ items, basePath }) {
   );
 }
 
-const FurniturePage = () => (
-  <LayoutWrapper>
-    <Navigation />
-    <ListWithFocus items={furnitureList} basePath="/furniture" />
-  </LayoutWrapper>
-);
+const FurniturePage = () => {
+  const isTouch = useIsTouch();
+  const reducedMotion = usePrefersReducedMotion();
+
+  // Enable page-level snapping only on touch & only on this page
+  useEffect(() => {
+    if (!isTouch || reducedMotion) return;
+
+    const root = document.documentElement;
+    const prevSnapType = root.style.scrollSnapType;
+    const prevPadTop = root.style.scrollPaddingTop;
+    const prevPadBottom = root.style.scrollPaddingBottom;
+
+    root.style.scrollSnapType = "y proximity"; // softer than mandatory
+    root.style.scrollPaddingTop = "6rem";      // account for fixed nav
+    root.style.scrollPaddingBottom = "6rem";
+
+    return () => {
+      root.style.scrollSnapType = prevSnapType || "";
+      root.style.scrollPaddingTop = prevPadTop || "";
+      root.style.scrollPaddingBottom = prevPadBottom || "";
+    };
+  }, [isTouch, reducedMotion]);
+
+  return (
+    <LayoutWrapper>
+      <Navigation />
+      <ListWithFocus items={furnitureList} basePath="/furniture" />
+    </LayoutWrapper>
+  );
+};
 
 const FurnitureDetail = () => {
   const { id } = useParams();
