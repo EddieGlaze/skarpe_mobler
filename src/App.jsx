@@ -137,18 +137,16 @@ const usePrefersReducedMotion = () => {
   return reduced;
 };
 
-// --- Visibility ratios via IntersectionObserver (for crossfade) ---
+// --- Intersection ratios (0..1) for each tile ---
 const buildThresholds = (steps = 20) =>
   Array.from({ length: steps + 1 }, (_, i) => i / steps);
 
 const useVisibilityRatios = (itemRefs) => {
-  const isTouch = useIsTouch();
   const [ratiosState, setRatiosState] = useState([]);
   const rafLock = useRef(false);
   const ratios = useRef([]);
 
   useEffect(() => {
-    // We can keep ratios on both touch/desktop without cost; but only needed for touch crossfade.
     ratios.current = new Array(itemRefs.current.length).fill(0);
 
     const observer = new IntersectionObserver(
@@ -180,67 +178,57 @@ const useVisibilityRatios = (itemRefs) => {
   return ratiosState;
 };
 
-// --- Stable focus by "center + hysteresis" (touch only) ---
-const useFocusByCenter = (itemRefs) => {
+// --- Rock-solid focus: EMA + debounce + margin (touch only) ---
+const useStableFocus = (ratios, itemCount) => {
   const isTouch = useIsTouch();
   const [focusIndex, setFocusIndex] = useState(-1);
-  const currentRef = useRef(-1);
-  const scheduled = useRef(false);
+
+  const scoresRef = useRef([]);
+  const lastSwitchRef = useRef(0);
 
   useEffect(() => {
-    if (!isTouch) return;
+    if (!isTouch || !ratios || ratios.length === 0) return;
 
-    const HYSTERESIS_PX = 32;                 // margin required to switch focus
-    const compute = () => {
-      scheduled.current = false;
-      const centerY = window.innerHeight / 2;
-      let bestIdx = -1;
-      let bestDist = Infinity;
+    // init scores
+    if (scoresRef.current.length !== itemCount) {
+      scoresRef.current = new Array(itemCount).fill(0);
+      setFocusIndex((prev) => (prev === -1 ? 0 : prev));
+      lastSwitchRef.current = performance.now();
+    }
 
-      itemRefs.current.forEach((el, idx) => {
-        if (!el) return;
-        const rect = el.getBoundingClientRect();
-        const elCenter = rect.top + rect.height / 2;
-        const dist = Math.abs(elCenter - centerY);
-        if (dist < bestDist) { bestDist = dist; bestIdx = idx; }
-      });
+    const alpha = 0.22;          // smoothing strength (higher = more reactive)
+    const margin = 0.10;         // candidate must beat current by 10%
+    const minInterval = 180;     // ms between switches
 
-      const prev = currentRef.current;
-      if (prev === -1) {
-        currentRef.current = bestIdx;
-        setFocusIndex(bestIdx);
-        return;
+    // update EMA scores
+    for (let i = 0; i < itemCount; i++) {
+      const r = ratios[i] ?? 0;
+      scoresRef.current[i] = (1 - alpha) * scoresRef.current[i] + alpha * r;
+    }
+
+    // find best score
+    let bestIdx = 0;
+    let best = -1;
+    for (let i = 0; i < itemCount; i++) {
+      if (scoresRef.current[i] > best) {
+        best = scoresRef.current[i];
+        bestIdx = i;
       }
-      if (bestIdx !== prev) {
-        const prevEl = itemRefs.current[prev];
-        const prevRect = prevEl ? prevEl.getBoundingClientRect() : null;
-        const prevCenter = prevRect ? prevRect.top + prevRect.height / 2 : Infinity;
-        const prevDist = prevRect ? Math.abs(prevCenter - centerY) : Infinity;
+    }
 
-        // Only switch if the new candidate is CLEARLY closer than the current one
-        if (bestDist + HYSTERESIS_PX < prevDist) {
-          currentRef.current = bestIdx;
-          setFocusIndex(bestIdx);
-        }
-      }
-    };
-
-    const onScroll = () => {
-      if (!scheduled.current) {
-        scheduled.current = true;
-        requestAnimationFrame(compute);
-      }
-    };
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    onScroll(); // initial compute
-
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-    };
-  }, [isTouch, itemRefs]);
+    // decide switch
+    const now = performance.now();
+    if (focusIndex === -1) {
+      setFocusIndex(bestIdx);
+      lastSwitchRef.current = now;
+    } else if (
+      now - lastSwitchRef.current > minInterval &&
+      scoresRef.current[bestIdx] > scoresRef.current[focusIndex] + margin
+    ) {
+      setFocusIndex(bestIdx);
+      lastSwitchRef.current = now;
+    }
+  }, [ratios, itemCount, isTouch, focusIndex]);
 
   return isTouch ? focusIndex : -1;
 };
@@ -253,13 +241,17 @@ const LayoutWrapper = ({ children, isHomePage = false }) => (
   </div>
 );
 
-// --- Navigation (Hjem + Møbler, hidden on Home) ---
-const Navigation = ({ hideOnHome = false }) => {
+// --- Navigation with optional glass layer on scroll ---
+const Navigation = ({ hideOnHome = false, glass = false, glassActive = false }) => {
   const { navigateWithTransition } = React.useContext(PageTransitionContext);
   if (hideOnHome) return null;
 
+  const containerBase = "fixed top-0 left-0 w-full flex flex-col items-start z-40 font-['Courier_New',_monospace] text-gray-600 px-4 sm:px-6 md:px-8 transition-colors duration-300";
+  const spacing = "py-3 sm:py-4";
+  const bgClass = glass && glassActive ? "bg-white/60 backdrop-blur-md" : "bg-transparent";
+
   return (
-    <div className="fixed top-0 left-0 w-full bg-transparent flex flex-col items-start py-3 sm:py-4 z-40 font-['Courier_New',_monospace] text-gray-600 px-4 sm:px-6 md:px-8">
+    <div className={`${containerBase} ${spacing} ${bgClass}`}>
       <a
         href="/"
         onClick={(e) => { e.preventDefault(); navigateWithTransition('/'); }}
@@ -319,11 +311,11 @@ const Home = () => {
 
 // --- Furniture pages (single page scroll + soft snap + stable focus + crossfade) ---
 const GalleryTile = React.memo(function GalleryTile({ src, label, inFocus, visibilityRatio, isTouch, reducedMotion }) {
-  // Subtle crossfade: 0.85 -> 1.0 as the tile becomes fully visible (touch only)
+  // Subtle crossfade on touch: 0.90 -> 1.0
   const imgOpacity = reducedMotion
     ? 1
     : isTouch
-      ? Math.min(1, 0.85 + 0.15 * (visibilityRatio || 0))
+      ? Math.min(1, 0.90 + 0.10 * (visibilityRatio || 0))
       : 1;
 
   // Overlay & label behavior:
@@ -366,9 +358,9 @@ function ListWithFocus({ items, basePath }) {
   const itemRefs = useRef([]);
   itemRefs.current = useMemo(() => new Array(items.length).fill(null), [items.length]);
 
-  // Stable focus (center + hysteresis) & visibility ratios (for crossfade)
-  const focusIndex = useFocusByCenter(itemRefs);
+  // Visibility (for crossfade), then stable focus (EMA + debounce + margin)
   const ratios = useVisibilityRatios(itemRefs);
+  const focusIndex = useStableFocus(ratios, items.length);
 
   return (
     <div className="w-full flex justify-center pt-28">
@@ -378,7 +370,7 @@ function ListWithFocus({ items, basePath }) {
             <div
               ref={(el) => (itemRefs.current[idx] = el)}
               className={isTouch ? "snap-center" : ""}
-              style={isTouch ? { scrollMarginTop: "6rem", scrollMarginBottom: "6rem", scrollSnapStop: "always" } : undefined}
+              style={isTouch ? { scrollMarginTop: "6rem", scrollMarginBottom: "6rem", scrollSnapStop: "normal" } : undefined}
             >
               <GalleryTile
                 src={item.images[0]}
@@ -399,8 +391,16 @@ function ListWithFocus({ items, basePath }) {
 const FurniturePage = () => {
   const isTouch = useIsTouch();
   const reducedMotion = usePrefersReducedMotion();
+  const [scrolled, setScrolled] = useState(false);
 
-  // Enable page-level snapping only on touch & only on this page
+  // Page-level soft snap on touch, and glass nav on scroll
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   useEffect(() => {
     if (!isTouch || reducedMotion) return;
 
@@ -422,7 +422,7 @@ const FurniturePage = () => {
 
   return (
     <LayoutWrapper>
-      <Navigation />
+      <Navigation glass glassActive={scrolled} />
       <ListWithFocus items={furnitureList} basePath="/furniture" />
     </LayoutWrapper>
   );
@@ -434,7 +434,7 @@ const FurnitureDetail = () => {
   if (!item) return <div className="p-6 text-left font-light text-gray-600">Furniture not found</div>;
   return (
     <LayoutWrapper>
-      <Navigation />
+      <Navigation glass glassActive />
       <div className="mx-auto w-full pt-28 px-4 sm:px-6 md:px-8 max-w-3xl">
         <div className="flex flex-col items-center">
           {item.images.map((img, idx) => (
