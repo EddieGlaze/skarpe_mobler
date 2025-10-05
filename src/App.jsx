@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { BrowserRouter as Router, Route, Routes, useParams, useNavigate, Navigate } from "react-router-dom";
 
 /**
@@ -24,6 +24,36 @@ const furnitureList = [
     `${import.meta.env.BASE_URL}images/hylle_a/Hylle_A_5.jpg`,
     `${import.meta.env.BASE_URL}images/hylle_a/Hylle_A_6.jpg`,
     `${import.meta.env.BASE_URL}images/hylle_a/Hylle_A_7.jpg`,
+  ]},
+  { id: "table2", name: "Skarpt Bord II", images: [
+    `${import.meta.env.BASE_URL}images/table/table-2.JPEG`,
+    `${import.meta.env.BASE_URL}images/table/table-1.JPEG`,
+    `${import.meta.env.BASE_URL}images/table/table-3.JPEG`,
+  ]},
+  { id: "chair2", name: "Skarp Stol II", images: [
+    `${import.meta.env.BASE_URL}images/chair/chair-2.JPEG`,
+    `${import.meta.env.BASE_URL}images/chair/chair-1.JPEG`,
+    `${import.meta.env.BASE_URL}images/chair/chair-3.JPEG`,
+  ]},
+  { id: "shelf2", name: "Skarp Hylle II", images: [
+    `${import.meta.env.BASE_URL}images/shelf/shelf-2.JPEG`,
+    `${import.meta.env.BASE_URL}images/shelf/shelf-1.JPEG`,
+    `${import.meta.env.BASE_URL}images/shelf/shelf-3.JPEG`,
+  ]},
+  { id: "table3", name: "Skarpt Bord III", images: [
+    `${import.meta.env.BASE_URL}images/table/table-3.JPEG`,
+    `${import.meta.env.BASE_URL}images/table/table-1.JPEG`,
+    `${import.meta.env.BASE_URL}images/table/table-2.JPEG`,
+  ]},
+  { id: "chair3", name: "Skarp Stol III", images: [
+    `${import.meta.env.BASE_URL}images/chair/chair-3.JPEG`,
+    `${import.meta.env.BASE_URL}images/chair/chair-1.JPEG`,
+    `${import.meta.env.BASE_URL}images/chair/chair-2.JPEG`,
+  ]},
+  { id: "shelf3", name: "Skarp Hylle III", images: [
+    `${import.meta.env.BASE_URL}images/shelf/shelf-3.JPEG`,
+    `${import.meta.env.BASE_URL}images/shelf/shelf-1.JPEG`,
+    `${import.meta.env.BASE_URL}images/shelf/shelf-2.JPEG`,
   ]},
 ];
 
@@ -77,7 +107,7 @@ const TransitionLink = ({ to, children, className = "" }) => {
   );
 };
 
-// --- Responsive helpers ---
+// --- Responsive + a11y helpers ---
 const useIsTouch = () => {
   const [isTouch, setIsTouch] = useState(() =>
     (typeof window !== 'undefined'
@@ -94,44 +124,77 @@ const useIsTouch = () => {
   return isTouch;
 };
 
-// Compute which tile is visually "in focus" (closest to viewport center)
-const useScrollFocusIndex = (refs) => {
+const usePrefersReducedMotion = () => {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const handler = (e) => setReduced(e.matches);
+    setReduced(mq.matches);
+    mq.addEventListener?.('change', handler);
+    return () => mq.removeEventListener?.('change', handler);
+  }, []);
+  return reduced;
+};
+
+// Efficient, smooth "focus" detection using IntersectionObserver (touch only)
+const buildThresholds = (steps = 20) =>
+  Array.from({ length: steps + 1 }, (_, i) => i / steps);
+
+const useFocusByIntersection = (itemRefs, rootRef) => {
   const isTouch = useIsTouch();
-  const [focusIndex, setFocusIndex] = useState(0);
+  const [focusIndex, setFocusIndex] = useState(-1);
+  const rafLock = useRef(false);
+  const ratios = useRef([]);
 
   useEffect(() => {
     if (!isTouch) return;
+    ratios.current = new Array(itemRefs.current.length).fill(0);
 
-    const compute = () => {
-      const centerY = window.innerHeight / 2;
-      let bestIdx = 0;
-      let bestDelta = Infinity;
-      refs.current.forEach((el, idx) => {
-        if (!el) return;
-        const rect = el.getBoundingClientRect();
-        const elCenter = rect.top + rect.height / 2;
-        const delta = Math.abs(centerY - elCenter);
-        const isVisible = rect.bottom > 0 && rect.top < window.innerHeight;
-        if (isVisible && delta < bestDelta) { bestDelta = delta; bestIdx = idx; }
-      });
-      setFocusIndex(bestIdx);
-    };
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const idx = Number(entry.target.getAttribute("data-idx"));
+          ratios.current[idx] = entry.intersectionRatio;
+        });
+        if (!rafLock.current) {
+          rafLock.current = true;
+          requestAnimationFrame(() => {
+            rafLock.current = false;
+            const arr = ratios.current;
+            let best = 0;
+            let bestIdx = 0;
+            for (let i = 0; i < arr.length; i++) {
+              if (arr[i] >= best) {
+                best = arr[i];
+                bestIdx = i;
+              }
+            }
+            setFocusIndex(bestIdx);
+          });
+        }
+      },
+      {
+        root: rootRef?.current || null,
+        threshold: buildThresholds(16),
+      }
+    );
 
-    compute();
-    const onScroll = () => compute();
-    const onResize = () => compute();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onResize);
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onResize);
-    };
-  }, [refs, isTouch]);
+    itemRefs.current.forEach((el, idx) => {
+      if (!el) return;
+      el.setAttribute("data-idx", String(idx));
+      observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+    // itemRefs changes only when list mounts
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isTouch, rootRef]);
 
   return isTouch ? focusIndex : -1;
 };
 
-// Layout wrapper
+// Wrapper: responsive page padding and readable line-length on mobile
 const LayoutWrapper = ({ children, isHomePage = false }) => (
   <div className={`min-h-screen flex flex-col font-['Courier_New',_monospace] text-left items-start ${isHomePage ? "" : "px-4 sm:px-6 md:px-8"}`}>
     <div className="flex-grow w-full">{children}</div>
@@ -173,7 +236,11 @@ const Home = () => {
     <LayoutWrapper isHomePage={true}>
       {/* Navigation hidden on Home */}
       <div className="relative w-full h-screen">
-        <img src={`${import.meta.env.BASE_URL}images/frontpage_images/all-1.JPEG`} alt="Industrial Furniture" className="w-full h-full object-cover" />
+        <img
+          src={`${import.meta.env.BASE_URL}images/frontpage_images/all-1.JPEG`}
+          alt="Industrial Furniture"
+          className="w-full h-full object-cover"
+        />
         <div className="absolute top-0 left-0 w-full pt-4 sm:pt-8 px-4 sm:px-6 md:px-8 text-left">
           <a href="/" className="block text-3xl sm:text-4xl md:text-5xl font-light mb-1 text-white uppercase font-['Courier_New',_monospace]">Studio Glazebrook</a>
           <span className="text-xs sm:text-sm font-light text-white">Contact: edvard@glazebrook.com | +47 123 45 678</span>
@@ -199,31 +266,79 @@ const Home = () => {
   );
 };
 
-// --- Furniture Pages ---
-function GalleryTile({ src, label, inFocus }) {
+// --- Furniture pages (smoother scroll) ---
+const GalleryTile = React.memo(function GalleryTile({ src, label, inFocus, reducedMotion }) {
+  // Light fade for label; respect reduced motion
+  const baseLabel = "mt-2 text-left transition-opacity duration-300";
+  const labelClass = reducedMotion
+    ? `${baseLabel}`
+    : `${baseLabel} ${inFocus ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`;
+
+  // Soft reveal overlay; respect reduced motion
+  const overlayClass = reducedMotion
+    ? "absolute inset-0 bg-gradient-to-b from-white/80 to-white/20"
+    : `absolute inset-0 bg-gradient-to-b from-white/90 to-white/30 transition-opacity duration-300 ${inFocus ? 'opacity-0' : 'opacity-100 group-hover:opacity-0'}`;
+
   return (
-    <div className="relative w-72 sm:w-80">
-      <div className={`absolute inset-0 bg-gradient-to-b from-white/90 to-white/30 transition-opacity duration-300 ${inFocus ? 'opacity-0' : 'opacity-100 group-hover:opacity-0'}`}></div>
-      <img src={src} alt={label} className="w-full h-auto object-cover" />
-      <div className={`mt-2 text-left transition-opacity duration-300 ${inFocus ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+    <div className="relative w-72 sm:w-80 will-change-transform">
+      <div className={overlayClass}></div>
+      <img
+        src={src}
+        alt={label}
+        className="w-full h-auto object-cover"
+        loading="lazy"
+        decoding="async"
+      />
+      <div className={labelClass}>
         <h2 className="text-sm font-light text-gray-600">{label}</h2>
       </div>
     </div>
   );
-}
+});
 
 function ListWithFocus({ items, basePath }) {
-  const refs = useRef([]);
-  refs.current = [];
-  const focusIndex = useScrollFocusIndex(refs);
+  const isTouch = useIsTouch();
+  const reducedMotion = usePrefersReducedMotion();
+
+  // Scroll container ref (root for intersection observer)
+  const scrollerRef = useRef(null);
+
+  // Item refs for observer
+  const itemRefs = useRef([]);
+  itemRefs.current = useMemo(() => new Array(items.length).fill(null), [items.length]);
+
+  // Focus index via IntersectionObserver (touch only)
+  const focusIndex = useFocusByIntersection(itemRefs, scrollerRef);
+
+  // Snap & smooth scrolling only on touch (desktop keeps default page scroll)
+  const snapClasses = isTouch
+    ? "overflow-y-auto snap-y snap-mandatory scroll-smooth"
+    : "";
+
+  // Account for fixed nav (~7rem). Use dynamic viewport height for mobile browsers.
+  const scrollerStyle = isTouch
+    ? { height: "calc(100dvh - 7rem)", scrollPaddingTop: "5rem", scrollPaddingBottom: "5rem" }
+    : {};
 
   return (
     <div className="flex justify-center pt-28">
-      <div className="flex flex-col items-center gap-10 sm:gap-12 max-w-xl pb-16">
+      <div
+        ref={scrollerRef}
+        className={`flex flex-col items-center gap-10 sm:gap-12 max-w-xl pb-16 ${snapClasses}`}
+        style={scrollerStyle}
+      >
         {items.map((item, idx) => (
           <TransitionLink to={`${basePath}/${item.id}`} key={item.id}>
-            <div ref={(el) => (refs.current[idx] = el)}>
-              <GalleryTile src={item.images[0]} label={item.name} inFocus={focusIndex === idx} />
+            <div
+              ref={(el) => (itemRefs.current[idx] = el)}
+              className={isTouch ? "snap-center" : ""}
+            >
+              <GalleryTile
+                src={item.images[0]}
+                label={item.name}
+                inFocus={focusIndex === idx}
+                reducedMotion={reducedMotion}
+              />
             </div>
           </TransitionLink>
         ))}
@@ -249,7 +364,14 @@ const FurnitureDetail = () => {
       <div className="mx-auto w-full pt-28 px-4 sm:px-6 md:px-8 max-w-3xl">
         <div className="flex flex-col items-center">
           {item.images.map((img, idx) => (
-            <img key={idx} src={img} alt={`${item.name} ${idx + 1}`} className="mb-6 sm:mb-8 w-full max-w-3xl object-contain" />
+            <img
+              key={idx}
+              src={img}
+              alt={`${item.name} ${idx + 1}`}
+              className="mb-6 sm:mb-8 w-full max-w-3xl object-contain"
+              loading="lazy"
+              decoding="async"
+            />
           ))}
           <h1 className="text-2xl sm:text-3xl font-light mb-2 text-gray-600 text-left w-full">{item.name}</h1>
           <p className="mb-6 font-light text-gray-600 text-left w-full text-sm sm:text-base">For inquiries about this piece, please click below:</p>
