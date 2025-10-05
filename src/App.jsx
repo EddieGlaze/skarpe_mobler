@@ -137,11 +137,6 @@ const useIsTouch = () => {
 };
 
 /* -------------------- Client-side image optimizer -------------------- */
-/**
- * Converts the original image to a downscaled WebP blob and caches it.
- * This reduces bytes transferred without you having to ship extra files.
- * Fallbacks to the original image if any step fails.
- */
 async function optimizeImageToWebP(src, targetWidth) {
   try {
     if (!('caches' in window)) throw new Error('No CacheStorage');
@@ -152,12 +147,10 @@ async function optimizeImageToWebP(src, targetWidth) {
       return await cached.blob();
     }
 
-    // Fetch original (once), decode, downscale, re-encode.
     const resp = await fetch(src, { credentials: 'same-origin' });
     if (!resp.ok) throw new Error('Fetch failed');
     const originalBlob = await resp.blob();
 
-    // Decode with createImageBitmap if available, else via HTMLImageElement
     let bitmap;
     if ('createImageBitmap' in window) {
       bitmap = await createImageBitmap(originalBlob);
@@ -168,7 +161,6 @@ async function optimizeImageToWebP(src, targetWidth) {
         im.onerror = reject;
         im.src = URL.createObjectURL(originalBlob);
       });
-      // draw to canvas to get bitmap-like object
       const c = document.createElement('canvas');
       c.width = img.naturalWidth; c.height = img.naturalHeight;
       const cx = c.getContext('2d');
@@ -194,7 +186,6 @@ async function optimizeImageToWebP(src, targetWidth) {
       if (canvas.convertToBlob) {
         outBlob = await canvas.convertToBlob({ type: 'image/webp', quality: 0.82 });
       } else {
-        // Safari fallback
         const c = document.createElement('canvas');
         c.width = tw; c.height = th;
         const cx = c.getContext('2d');
@@ -219,36 +210,27 @@ async function optimizeImageToWebP(src, targetWidth) {
     await cache.put(key, new Response(outBlob));
     return outBlob;
   } catch (e) {
-    // On any failure, return null to signal fallback to original.
     return null;
   }
 }
 
-/**
- * SmartImg
- * - Waits until visible (unless priority) to start optimizing.
- * - Downscales to containerWidth * DPR (capped).
- * - Uses cached WebP if available; otherwise falls back to original.
- */
 function SmartImg({
   src,
   alt,
   className = "",
   priority = false,
-  capWidth = 1600,      // upper bound in CSS pixels × DPR
-  wrapperRef,           // optional external ref to measure width
+  capWidth = 1600,
+  wrapperRef,
 }) {
   const imgRef = useRef(null);
-  const [currentSrc, setCurrentSrc] = useState("");   // object URL or original
+  const [currentSrc, setCurrentSrc] = useState("");
   const objectUrlRef = useRef(null);
 
-  // Measure container width
   const getContainerWidth = useCallback(() => {
     const el = (wrapperRef?.current) || imgRef.current?.parentElement || imgRef.current;
     return el ? el.clientWidth : 800;
   }, [wrapperRef]);
 
-  // Start optimization when visible (or immediately if priority)
   useEffect(() => {
     let io;
     let cancelled = false;
@@ -261,13 +243,11 @@ function SmartImg({
       if (cancelled) return;
 
       if (blob) {
-        // Use optimized object URL (and revoke previous)
         if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
         const url = URL.createObjectURL(blob);
         objectUrlRef.current = url;
         setCurrentSrc(url);
       } else {
-        // Fallback to original
         setCurrentSrc(src);
       }
     };
@@ -285,7 +265,6 @@ function SmartImg({
       }, { rootMargin: "200px" });
       if (imgRef.current) io.observe(imgRef.current);
     } else {
-      // Older browsers
       start();
     }
 
@@ -378,8 +357,6 @@ const Home = () => {
 };
 
 /* -------------------- Furniture Index -------------------- */
-// Mobile: no overlay/fade. Desktop: overlay fades only on hover.
-
 const GalleryTile = React.memo(function GalleryTile({ src, label }) {
   const isTouch = useIsTouch();
   const wrap = useRef(null);
@@ -442,7 +419,7 @@ function useSwipe(onLeft, onRight) {
     if (!tracking.current) return;
     const dx = e.touches[0].clientX - startX.current;
     const dy = e.touches[0].clientY - startY.current;
-    if (Math.abs(dy) > Math.abs(dx) * 1.2) tracking.current = false; // let vertical scroll pass
+    if (Math.abs(dy) > Math.abs(dx) * 1.2) tracking.current = false;
   };
   const onTouchEnd = (e) => {
     if (!tracking.current) return;
@@ -462,7 +439,6 @@ const Lightbox = ({ images, startIndex, onClose, name }) => {
   const go = useCallback((n) => setIdx((cur) => (cur + n + images.length) % images.length), [images.length]);
   const close = useCallback(() => onClose?.(), [onClose]);
 
-  // lock body scroll
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -478,7 +454,6 @@ const Lightbox = ({ images, startIndex, onClose, name }) => {
     };
   }, [close, go]);
 
-  // swipe down to close (mobile)
   const startY = useRef(0), tracking = useRef(false);
   const onTouchStart = (e) => {
     if (e.touches?.length !== 1) return;
@@ -503,7 +478,6 @@ const Lightbox = ({ images, startIndex, onClose, name }) => {
       role="dialog"
       aria-modal="true"
     >
-      {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-3">
         <div className="text-sm">{idx + 1} / {images.length}</div>
         <button
@@ -513,7 +487,6 @@ const Lightbox = ({ images, startIndex, onClose, name }) => {
         >×</button>
       </div>
 
-      {/* Stage */}
       <div ref={stageRef} className="flex-1 relative">
         <div className="absolute inset-0 flex items-center justify-center">
           <SmartImg
@@ -526,7 +499,6 @@ const Lightbox = ({ images, startIndex, onClose, name }) => {
           />
         </div>
 
-        {/* Arrows */}
         <button
           type="button"
           aria-label="Forrige"
@@ -551,7 +523,6 @@ const Carousel = ({ images, name, onOpenLightbox }) => {
   const go = useCallback((n) => setIdx((cur) => (cur + n + total) % total), [total]);
   const goTo = (i) => setIdx(i);
 
-  // Keyboard left/right
   const wrapRef = useRef(null);
   useEffect(() => {
     const el = wrapRef.current;
@@ -566,7 +537,6 @@ const Carousel = ({ images, name, onOpenLightbox }) => {
 
   const { onTouchStart, onTouchMove, onTouchEnd } = useSwipe(() => go(1), () => go(-1));
 
-  // Thumbnails auto-follow
   const thumbRefs = useRef([]);
   useEffect(() => {
     const el = thumbRefs.current[idx];
@@ -575,7 +545,6 @@ const Carousel = ({ images, name, onOpenLightbox }) => {
     }
   }, [idx]);
 
-  // Wrapper for measuring SmartImg capWidth target
   const stageWrap = useRef(null);
 
   return (
@@ -595,21 +564,24 @@ const Carousel = ({ images, name, onOpenLightbox }) => {
           aria-live="polite"
         >
           {images.map((src, i) => (
-            <div key={i} className="w-full h-full shrink-0 flex items-center justify-center p-2">
+            <div
+              key={i}
+              className="relative w-full h-full shrink-0 flex items-center justify-center p-2"
+            >
               <SmartImg
                 src={src}
                 alt={`${name} – bilde ${i + 1}`}
-                className="max-w-full max-h-full object-contain block cursor-zoom-in"
+                className="max-w-full max-h-full object-contain block"
                 priority={i === idx}
                 capWidth={1800}
                 wrapperRef={stageWrap}
               />
-              {/* Click catcher for full-screen */}
+              {/* Click catcher scoped to THIS slide (fix): */}
               <button
                 type="button"
                 onClick={() => onOpenLightbox?.(i)}
                 aria-label="Åpne i fullskjerm"
-                className="absolute inset-0"
+                className="absolute inset-0 cursor-zoom-in"
               />
             </div>
           ))}
