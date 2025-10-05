@@ -172,7 +172,7 @@ async function optimizeImageToWebP(src, targetWidth) {
     const tw = Math.max(1, Math.round(srcW * scale));
     const th = Math.max(1, Math.round(srcH * scale));
 
-    // Slightly higher quality for small outputs to avoid thumbnail blur
+    // Higher quality for small outputs -> avoids persistent blur on retina
     const q = tw <= 400 ? 0.9 : tw <= 900 ? 0.86 : 0.82;
 
     let outBlob;
@@ -204,10 +204,10 @@ async function optimizeImageToWebP(src, targetWidth) {
 }
 
 /**
- * SmartImg with:
- * - higher-density option for tiny images (thumbnails),
- * - spinner that appears ONLY if load takes > 1s,
- * - wrapper sizing to prevent layout shift (used on hero).
+ * SmartImg
+ * - spinner: only if enabled, and only after 1s delay (to avoid flicker).
+ * - wrapperClassName: size wrapper (e.g., hero full-screen).
+ * - pixelRatioMultiplier: >1 for extra sharpness on tiny images (thumbnails).
  */
 function SmartImg({
   src,
@@ -217,7 +217,8 @@ function SmartImg({
   priority = false,
   capWidth = 1600,
   wrapperRef,
-  pixelRatioMultiplier = 1.0, // >1 for extra sharpness on small assets
+  pixelRatioMultiplier = 1.0,
+  spinner = true, // set to false for thumbnails
 }) {
   const mountRef = useRef(null);
   const [currentSrc, setCurrentSrc] = useState("");
@@ -227,21 +228,21 @@ function SmartImg({
   const objectUrlRef = useRef(null);
 
   const getContainerWidth = useCallback(() => {
-    const el = (wrapperRef?.current) || mountRef.current?.parentElement || mountRef.current;
+    const el = (wrapperRef?.current) || mountRef.current || mountRef.current?.parentElement;
     return el ? el.clientWidth : 800;
   }, [wrapperRef]);
 
-  // Start image preparation when visible (or immediately if priority)
   useEffect(() => {
     let io;
     let cancelled = false;
 
     const start = async () => {
       setLoaded(false);
-      // Delay spinner to avoid flashes under 1s
-      clearTimeout(spinnerTimerRef.current);
-      setShowSpinner(false);
-      spinnerTimerRef.current = setTimeout(() => setShowSpinner(true), 1000);
+      if (spinner) {
+        clearTimeout(spinnerTimerRef.current);
+        setShowSpinner(false);
+        spinnerTimerRef.current = setTimeout(() => setShowSpinner(true), 1000);
+      }
 
       const dpr = Math.min(3, window.devicePixelRatio || 1);
       const targetW = Math.min(capWidth, Math.ceil(getContainerWidth() * dpr * pixelRatioMultiplier));
@@ -284,13 +285,13 @@ function SmartImg({
         objectUrlRef.current = null;
       }
     };
-  }, [src, priority, capWidth, getContainerWidth, pixelRatioMultiplier]);
+  }, [src, priority, capWidth, getContainerWidth, pixelRatioMultiplier, spinner]);
 
-  // Before we have a src, draw a clean placeholder (spinner delayed)
+  // Placeholder while determining src (spinner optional)
   if (!currentSrc) {
     return (
-      <div ref={mountRef} className={`relative ${wrapperClassName}`} aria-busy={showSpinner ? "true" : "false"}>
-        {showSpinner && (
+      <div ref={mountRef} className={`relative ${wrapperClassName}`} aria-busy={spinner && showSpinner ? "true" : "false"}>
+        {(spinner && showSpinner) && (
           <div className="absolute inset-0 flex items-center justify-center" role="status" aria-label="Laster bilde">
             <div className="animate-spin w-6 h-6 border border-gray-300 border-t-gray-700" />
           </div>
@@ -299,9 +300,9 @@ function SmartImg({
     );
   }
 
-  // After src, render image; overlay spinner until natural 'load'
+  // After src, render image; optional spinner overlay until loaded
   return (
-    <div ref={mountRef} className={`relative ${wrapperClassName}`} aria-busy={!loaded ? "true" : "false"}>
+    <div ref={mountRef} className={`relative ${wrapperClassName}`} aria-busy={spinner && !loaded ? "true" : "false"}>
       <img
         src={currentSrc}
         alt={alt}
@@ -311,7 +312,7 @@ function SmartImg({
         onLoad={() => { setLoaded(true); clearTimeout(spinnerTimerRef.current); setShowSpinner(false); }}
         onError={() => { setLoaded(true); clearTimeout(spinnerTimerRef.current); setShowSpinner(false); }}
       />
-      {(!loaded && showSpinner) && (
+      {(spinner && !loaded && showSpinner) && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none" role="status" aria-label="Laster bilde">
           <div className="animate-spin w-6 h-6 border border-gray-300 border-t-gray-700" />
         </div>
@@ -469,7 +470,7 @@ function useSwipe(onLeft, onRight) {
     if (!tracking.current) return;
     const dx = e.touches[0].clientX - startX.current;
     const dy = e.touches[0].clientY - startY.current;
-    if (Math.abs(dy) > Math.abs(dx) * 1.2) tracking.current = false;
+    if (Math.abs(dy) > Math.abs(dx) * 1.2) tracking.current = false; // allow vertical scroll
   };
   const onTouchEnd = (e) => {
     if (!tracking.current) return;
@@ -575,6 +576,7 @@ const Carousel = ({ images, name, onOpenLightbox }) => {
   const go = useCallback((n) => setIdx((cur) => (cur + n + total) % total), [total]);
   const goTo = (i) => setIdx(i);
 
+  // Keyboard left/right
   const wrapRef = useRef(null);
   useEffect(() => {
     const el = wrapRef.current;
@@ -602,7 +604,7 @@ const Carousel = ({ images, name, onOpenLightbox }) => {
 
   return (
     <div ref={wrapRef} tabIndex={0} className="w-full max-w-3xl mx-auto outline-none select-none">
-      {/* Stage */}
+    {/* Stage */}
       <div
         ref={stageWrap}
         className="relative w-full aspect-[4/3] bg-white border border-gray-200 overflow-hidden"
@@ -655,7 +657,7 @@ const Carousel = ({ images, name, onOpenLightbox }) => {
         >›</button>
       </div>
 
-      {/* Thumbnails (extra-sharp) */}
+      {/* Thumbnails (extra-sharp, no spinner) */}
       <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
         {images.map((src, i) => (
           <button
@@ -670,9 +672,11 @@ const Carousel = ({ images, name, onOpenLightbox }) => {
             <SmartImg
               src={src}
               alt=""
-              className="block h-16 w-24 object-cover"
-              capWidth={480}
-              pixelRatioMultiplier={1.6}
+              wrapperClassName="w-24 h-16"
+              className="w-24 h-16 object-cover block"
+              capWidth={512}
+              pixelRatioMultiplier={2.0}
+              spinner={false}   {/* no spinner on thumbs */}
             />
           </button>
         ))}
