@@ -100,7 +100,7 @@ const useScrollFocusIndex = (refs) => {
   const [focusIndex, setFocusIndex] = useState(0);
 
   useEffect(() => {
-    if (!isTouch) return; // Only needed on touch devices
+    if (!isTouch) return;
 
     const compute = () => {
       const centerY = window.innerHeight / 2;
@@ -139,9 +139,11 @@ const LayoutWrapper = ({ children, isHomePage = false }) => (
   </div>
 );
 
-// --- Navigation (now includes Hjem + Møbler on all pages) ---
-const Navigation = () => {
+// --- Navigation (Hjem + Møbler, hidden on Home) ---
+const Navigation = ({ hideOnHome = false }) => {
   const { navigateWithTransition } = React.useContext(PageTransitionContext);
+  if (hideOnHome) return null;
+
   return (
     <div className="fixed top-0 left-0 w-full bg-transparent flex flex-col items-start py-3 sm:py-4 z-40 font-['Courier_New',_monospace] text-gray-600 px-4 sm:px-6 md:px-8">
       <a
@@ -164,12 +166,12 @@ const Footer = () => (
   <footer className="w-full py-12 px-4 sm:px-6 md:px-8 text-left mt-16 font-['Courier_New',_monospace] text-gray-600" />
 );
 
-// Home Page
+// --- Home Page (no Navigation on top now) ---
 const Home = () => {
   const { navigateWithTransition } = React.useContext(PageTransitionContext);
   return (
     <LayoutWrapper isHomePage={true}>
-      <Navigation />
+      {/* Navigation hidden on Home */}
       <div className="relative w-full h-screen">
         <img src={`${import.meta.env.BASE_URL}images/frontpage_images/all-1.JPEG`} alt="Industrial Furniture" className="w-full h-full object-cover" />
         <div className="absolute top-0 left-0 w-full pt-4 sm:pt-8 px-4 sm:px-6 md:px-8 text-left">
@@ -197,7 +199,7 @@ const Home = () => {
   );
 };
 
-// --- Furniture pages ---
+// --- Furniture Pages ---
 function GalleryTile({ src, label, inFocus }) {
   return (
     <div className="relative w-72 sm:w-80">
