@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useLayoutEffect, useMemo } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { BrowserRouter as Router, Route, Routes, useParams, useNavigate, Navigate, useLocation } from "react-router-dom";
 
 /**
@@ -143,9 +143,7 @@ async function optimizeImageToWebP(src, targetWidth) {
     const cache = await caches.open('sg-img-opt-v1');
     const key = `${src}|w=${Math.round(targetWidth)}`;
     const cached = await cache.match(key);
-    if (cached) {
-      return await cached.blob();
-    }
+    if (cached) return await cached.blob();
 
     const resp = await fetch(src, { credentials: 'same-origin' });
     if (!resp.ok) throw new Error('Fetch failed');
@@ -178,24 +176,11 @@ async function optimizeImageToWebP(src, targetWidth) {
       const ctx = canvas.getContext('2d', { alpha: false });
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
-      if (bitmap instanceof ImageBitmap) {
-        ctx.drawImage(bitmap, 0, 0, tw, th);
-      } else {
-        ctx.drawImage(bitmap._img, 0, 0, tw, th);
-      }
-      if (canvas.convertToBlob) {
-        outBlob = await canvas.convertToBlob({ type: 'image/webp', quality: 0.82 });
-      } else {
-        const c = document.createElement('canvas');
-        c.width = tw; c.height = th;
-        const cx = c.getContext('2d');
-        cx.imageSmoothingEnabled = true;
-        cx.imageSmoothingQuality = 'high';
-        if (bitmap instanceof ImageBitmap) cx.drawImage(bitmap, 0, 0, tw, th);
-        else cx.drawImage(bitmap._img, 0, 0, tw, th);
-        outBlob = await new Promise(res => c.toBlob(res, 'image/webp', 0.82));
-      }
-    } else {
+      if (bitmap instanceof ImageBitmap) ctx.drawImage(bitmap, 0, 0, tw, th);
+      else ctx.drawImage(bitmap._img, 0, 0, tw, th);
+      if (canvas.convertToBlob) outBlob = await canvas.convertToBlob({ type: 'image/webp', quality: 0.82 });
+    }
+    if (!outBlob) {
       const c = document.createElement('canvas');
       c.width = tw; c.height = th;
       const cx = c.getContext('2d');
@@ -206,14 +191,19 @@ async function optimizeImageToWebP(src, targetWidth) {
       outBlob = await new Promise(res => c.toBlob(res, 'image/webp', 0.82));
     }
 
-    if (!outBlob) throw new Error('Encoding failed');
     await cache.put(key, new Response(outBlob));
     return outBlob;
-  } catch (e) {
+  } catch {
     return null;
   }
 }
 
+/**
+ * SmartImg with spinner placeholder:
+ * - While the optimized/original source is being prepared, we render a centered spinner.
+ * - After the <img> receives its source, we keep the spinner over it until 'load' fires.
+ * - If anything fails, we fall back to the original image.
+ */
 function SmartImg({
   src,
   alt,
@@ -222,20 +212,24 @@ function SmartImg({
   capWidth = 1600,
   wrapperRef,
 }) {
-  const imgRef = useRef(null);
-  const [currentSrc, setCurrentSrc] = useState("");
+  const mountRef = useRef(null);         // observed element before src is ready
+  const imgElRef = useRef(null);         // actual <img> element once we have a src
+  const [currentSrc, setCurrentSrc] = useState("");   // object URL or original
+  const [loaded, setLoaded] = useState(false);
   const objectUrlRef = useRef(null);
 
   const getContainerWidth = useCallback(() => {
-    const el = (wrapperRef?.current) || imgRef.current?.parentElement || imgRef.current;
+    const el = (wrapperRef?.current) || mountRef.current?.parentElement || mountRef.current;
     return el ? el.clientWidth : 800;
   }, [wrapperRef]);
 
+  // Kick off optimization only when visible (unless priority)
   useEffect(() => {
     let io;
     let cancelled = false;
 
     const start = async () => {
+      setLoaded(false);
       const dpr = Math.min(3, window.devicePixelRatio || 1);
       const targetW = Math.min(capWidth, Math.ceil(getContainerWidth() * dpr));
 
@@ -248,7 +242,7 @@ function SmartImg({
         objectUrlRef.current = url;
         setCurrentSrc(url);
       } else {
-        setCurrentSrc(src);
+        setCurrentSrc(src); // fallback to original
       }
     };
 
@@ -263,7 +257,7 @@ function SmartImg({
           }
         });
       }, { rootMargin: "200px" });
-      if (imgRef.current) io.observe(imgRef.current);
+      if (mountRef.current) io.observe(mountRef.current);
     } else {
       start();
     }
@@ -278,15 +272,35 @@ function SmartImg({
     };
   }, [src, priority, capWidth, getContainerWidth]);
 
+  // Placeholder spinner before we even have a src
+  if (!currentSrc) {
+    return (
+      <div ref={mountRef} className={`relative ${className}`}>
+        <div className="absolute inset-0 flex items-center justify-center" role="status" aria-label="Laster bilde">
+          <div className="animate-spin w-6 h-6 border border-gray-300 border-t-gray-700" />
+        </div>
+      </div>
+    );
+  }
+
+  // After we have a src, render the image; keep spinner overlay until onLoad
   return (
-    <img
-      ref={imgRef}
-      src={currentSrc || undefined}
-      alt={alt}
-      className={className}
-      loading={priority ? "eager" : "lazy"}
-      decoding="async"
-    />
+    <div ref={mountRef} className={`relative`}>
+      <img
+        ref={imgElRef}
+        src={currentSrc}
+        alt={alt}
+        className={className}
+        loading={priority ? "eager" : "lazy"}
+        decoding="async"
+        onLoad={() => setLoaded(true)}
+      />
+      {!loaded && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none" role="status" aria-label="Laster bilde">
+          <div className="animate-spin w-6 h-6 border border-gray-300 border-t-gray-700" />
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -357,6 +371,8 @@ const Home = () => {
 };
 
 /* -------------------- Furniture Index -------------------- */
+// Mobile: no overlay/fade. Desktop: overlay fades only on hover.
+
 const GalleryTile = React.memo(function GalleryTile({ src, label }) {
   const isTouch = useIsTouch();
   const wrap = useRef(null);
@@ -454,6 +470,7 @@ const Lightbox = ({ images, startIndex, onClose, name }) => {
     };
   }, [close, go]);
 
+  // swipe down to close (mobile)
   const startY = useRef(0), tracking = useRef(false);
   const onTouchStart = (e) => {
     if (e.touches?.length !== 1) return;
@@ -478,6 +495,7 @@ const Lightbox = ({ images, startIndex, onClose, name }) => {
       role="dialog"
       aria-modal="true"
     >
+      {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-3">
         <div className="text-sm">{idx + 1} / {images.length}</div>
         <button
@@ -487,6 +505,7 @@ const Lightbox = ({ images, startIndex, onClose, name }) => {
         >×</button>
       </div>
 
+      {/* Stage */}
       <div ref={stageRef} className="flex-1 relative">
         <div className="absolute inset-0 flex items-center justify-center">
           <SmartImg
@@ -499,6 +518,7 @@ const Lightbox = ({ images, startIndex, onClose, name }) => {
           />
         </div>
 
+        {/* Arrows */}
         <button
           type="button"
           aria-label="Forrige"
@@ -523,6 +543,7 @@ const Carousel = ({ images, name, onOpenLightbox }) => {
   const go = useCallback((n) => setIdx((cur) => (cur + n + total) % total), [total]);
   const goTo = (i) => setIdx(i);
 
+  // Keyboard left/right
   const wrapRef = useRef(null);
   useEffect(() => {
     const el = wrapRef.current;
@@ -537,6 +558,7 @@ const Carousel = ({ images, name, onOpenLightbox }) => {
 
   const { onTouchStart, onTouchMove, onTouchEnd } = useSwipe(() => go(1), () => go(-1));
 
+  // Thumbnails auto-follow
   const thumbRefs = useRef([]);
   useEffect(() => {
     const el = thumbRefs.current[idx];
@@ -576,7 +598,7 @@ const Carousel = ({ images, name, onOpenLightbox }) => {
                 capWidth={1800}
                 wrapperRef={stageWrap}
               />
-              {/* Click catcher scoped to THIS slide (fix): */}
+              {/* Click catcher per-slide (opens lightbox for ANY image) */}
               <button
                 type="button"
                 onClick={() => onOpenLightbox?.(i)}
