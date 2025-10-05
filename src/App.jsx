@@ -137,19 +137,18 @@ const usePrefersReducedMotion = () => {
   return reduced;
 };
 
-// Efficient, smooth "focus" detection using IntersectionObserver (viewport root)
+// --- Visibility ratios via IntersectionObserver (for crossfade) ---
 const buildThresholds = (steps = 20) =>
   Array.from({ length: steps + 1 }, (_, i) => i / steps);
 
-const useFocusByIntersection = (itemRefs) => {
+const useVisibilityRatios = (itemRefs) => {
   const isTouch = useIsTouch();
-  const [focusIndex, setFocusIndex] = useState(-1);
-  const [ratiosState, setRatiosState] = useState([]); // expose ratios for crossfade
+  const [ratiosState, setRatiosState] = useState([]);
   const rafLock = useRef(false);
   const ratios = useRef([]);
 
   useEffect(() => {
-    if (!isTouch) return;
+    // We can keep ratios on both touch/desktop without cost; but only needed for touch crossfade.
     ratios.current = new Array(itemRefs.current.length).fill(0);
 
     const observer = new IntersectionObserver(
@@ -162,18 +161,7 @@ const useFocusByIntersection = (itemRefs) => {
           rafLock.current = true;
           requestAnimationFrame(() => {
             rafLock.current = false;
-            const arr = ratios.current.slice();
-            // find best visible
-            let best = 0;
-            let bestIdx = 0;
-            for (let i = 0; i < arr.length; i++) {
-              if (arr[i] >= best) {
-                best = arr[i];
-                bestIdx = i;
-              }
-            }
-            setFocusIndex(bestIdx);
-            setRatiosState(arr);
+            setRatiosState(ratios.current.slice());
           });
         }
       },
@@ -187,13 +175,77 @@ const useFocusByIntersection = (itemRefs) => {
     });
 
     return () => observer.disconnect();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isTouch]);
+  }, [itemRefs]);
 
-  return { focusIndex: isTouch ? focusIndex : -1, ratios: ratiosState };
+  return ratiosState;
 };
 
-// Wrapper: responsive page padding and readable line-length on mobile
+// --- Stable focus by "center + hysteresis" (touch only) ---
+const useFocusByCenter = (itemRefs) => {
+  const isTouch = useIsTouch();
+  const [focusIndex, setFocusIndex] = useState(-1);
+  const currentRef = useRef(-1);
+  const scheduled = useRef(false);
+
+  useEffect(() => {
+    if (!isTouch) return;
+
+    const HYSTERESIS_PX = 32;                 // margin required to switch focus
+    const compute = () => {
+      scheduled.current = false;
+      const centerY = window.innerHeight / 2;
+      let bestIdx = -1;
+      let bestDist = Infinity;
+
+      itemRefs.current.forEach((el, idx) => {
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        const elCenter = rect.top + rect.height / 2;
+        const dist = Math.abs(elCenter - centerY);
+        if (dist < bestDist) { bestDist = dist; bestIdx = idx; }
+      });
+
+      const prev = currentRef.current;
+      if (prev === -1) {
+        currentRef.current = bestIdx;
+        setFocusIndex(bestIdx);
+        return;
+      }
+      if (bestIdx !== prev) {
+        const prevEl = itemRefs.current[prev];
+        const prevRect = prevEl ? prevEl.getBoundingClientRect() : null;
+        const prevCenter = prevRect ? prevRect.top + prevRect.height / 2 : Infinity;
+        const prevDist = prevRect ? Math.abs(prevCenter - centerY) : Infinity;
+
+        // Only switch if the new candidate is CLEARLY closer than the current one
+        if (bestDist + HYSTERESIS_PX < prevDist) {
+          currentRef.current = bestIdx;
+          setFocusIndex(bestIdx);
+        }
+      }
+    };
+
+    const onScroll = () => {
+      if (!scheduled.current) {
+        scheduled.current = true;
+        requestAnimationFrame(compute);
+      }
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    onScroll(); // initial compute
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, [isTouch, itemRefs]);
+
+  return isTouch ? focusIndex : -1;
+};
+
+// --- Layout wrapper ---
 const LayoutWrapper = ({ children, isHomePage = false }) => (
   <div className={`min-h-screen flex flex-col font-['Courier_New',_monospace] text-left items-start w-full overflow-x-hidden ${isHomePage ? "" : "px-4 sm:px-6 md:px-8"}`}>
     <div className="flex-grow w-full">{children}</div>
@@ -265,19 +317,28 @@ const Home = () => {
   );
 };
 
-// --- Furniture pages (single page scroll + softer snapping + crossfade) ---
-const GalleryTile = React.memo(function GalleryTile({ src, label, inFocus, reducedMotion, visibilityRatio }) {
-  // Subtle crossfade: 0.85 -> 1.0 as the tile becomes fully visible
-  const imgOpacity = reducedMotion ? 1 : Math.min(1, 0.85 + 0.15 * (visibilityRatio || 0));
+// --- Furniture pages (single page scroll + soft snap + stable focus + crossfade) ---
+const GalleryTile = React.memo(function GalleryTile({ src, label, inFocus, visibilityRatio, isTouch, reducedMotion }) {
+  // Subtle crossfade: 0.85 -> 1.0 as the tile becomes fully visible (touch only)
+  const imgOpacity = reducedMotion
+    ? 1
+    : isTouch
+      ? Math.min(1, 0.85 + 0.15 * (visibilityRatio || 0))
+      : 1;
 
-  const baseLabel = "mt-2 text-left transition-opacity";
-  const labelClass = reducedMotion
-    ? `${baseLabel}`
-    : `${baseLabel} duration-500 ${inFocus ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`;
+  // Overlay & label behavior:
+  // - Touch: reveal on focus (no hover)
+  // - Desktop: reveal on hover (group-hover)
+  const overlayBase = "absolute inset-0 bg-gradient-to-b from-white/90 to-white/30 transition-opacity duration-300";
+  const labelBase = "mt-2 text-left transition-opacity duration-300";
 
-  const overlayClass = reducedMotion
-    ? "absolute inset-0 bg-gradient-to-b from-white/80 to-white/20"
-    : `absolute inset-0 bg-gradient-to-b from-white/90 to-white/30 transition-opacity duration-500 ${inFocus ? 'opacity-0' : 'opacity-100 group-hover:opacity-0'}`;
+  const overlayClass = isTouch
+    ? `${overlayBase} ${inFocus ? 'opacity-0' : 'opacity-100'}`
+    : `${overlayBase} opacity-100 group-hover:opacity-0`;
+
+  const labelClass = isTouch
+    ? `${labelBase} ${inFocus ? 'opacity-100' : 'opacity-0'}`
+    : `${labelBase} opacity-0 group-hover:opacity-100`;
 
   return (
     <div className="relative w-72 sm:w-80 will-change-transform mx-auto">
@@ -301,12 +362,13 @@ function ListWithFocus({ items, basePath }) {
   const isTouch = useIsTouch();
   const reducedMotion = usePrefersReducedMotion();
 
-  // Item refs for observer
+  // Item refs for observers/measurements
   const itemRefs = useRef([]);
   itemRefs.current = useMemo(() => new Array(items.length).fill(null), [items.length]);
 
-  // Focus index + visibility ratios (viewport root)
-  const { focusIndex, ratios } = useFocusByIntersection(itemRefs);
+  // Stable focus (center + hysteresis) & visibility ratios (for crossfade)
+  const focusIndex = useFocusByCenter(itemRefs);
+  const ratios = useVisibilityRatios(itemRefs);
 
   return (
     <div className="w-full flex justify-center pt-28">
@@ -316,14 +378,15 @@ function ListWithFocus({ items, basePath }) {
             <div
               ref={(el) => (itemRefs.current[idx] = el)}
               className={isTouch ? "snap-center" : ""}
-              style={isTouch ? { scrollMarginTop: "6rem", scrollMarginBottom: "6rem" } : undefined}
+              style={isTouch ? { scrollMarginTop: "6rem", scrollMarginBottom: "6rem", scrollSnapStop: "always" } : undefined}
             >
               <GalleryTile
                 src={item.images[0]}
                 label={item.name}
                 inFocus={focusIndex === idx}
-                reducedMotion={reducedMotion}
                 visibilityRatio={ratios?.[idx] ?? 0}
+                isTouch={isTouch}
+                reducedMotion={reducedMotion}
               />
             </div>
           </TransitionLink>
@@ -346,7 +409,7 @@ const FurniturePage = () => {
     const prevPadTop = root.style.scrollPaddingTop;
     const prevPadBottom = root.style.scrollPaddingBottom;
 
-    root.style.scrollSnapType = "y proximity"; // softer than mandatory
+    root.style.scrollSnapType = "y proximity"; // softer snap
     root.style.scrollPaddingTop = "6rem";      // account for fixed nav
     root.style.scrollPaddingBottom = "6rem";
 
