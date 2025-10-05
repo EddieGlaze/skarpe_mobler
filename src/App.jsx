@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { BrowserRouter as Router, Route, Routes, useParams, useNavigate, Navigate } from "react-router-dom";
 
 /**
  * DATA
  * (Only Furniture is active. Projects/Drawings removed.)
- * For captions, we auto-generate "«Name» – Bilde N" if no explicit caption list exists.
  */
 const furnitureList = [
   { id: "table1", name: "Skarpt Bord", images: [
@@ -58,7 +57,7 @@ const furnitureList = [
   ]},
 ];
 
-// --- Page transition context ---
+// --- Page transition context (kept minimal) ---
 const PageTransitionContext = React.createContext();
 const transitionDuration = 600;
 
@@ -108,77 +107,6 @@ const TransitionLink = ({ to, children, className = "" }) => {
   );
 };
 
-// --- Responsive + a11y helpers ---
-const useIsTouch = () => {
-  const [isTouch, setIsTouch] = useState(() =>
-    (typeof window !== 'undefined'
-      ? window.matchMedia('(hover: none) and (pointer: coarse)').matches
-      : false)
-  );
-  useEffect(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) return;
-    const mq = window.matchMedia('(hover: none) and (pointer: coarse)');
-    const handler = (e) => setIsTouch(e.matches);
-    mq.addEventListener?.('change', handler);
-    return () => mq.removeEventListener?.('change', handler);
-  }, []);
-  return isTouch;
-};
-
-const usePrefersReducedMotion = () => {
-  const [reduced, setReduced] = useState(false);
-  useEffect(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) return;
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const handler = (e) => setReduced(e.matches);
-    setReduced(mq.matches);
-    mq.addEventListener?.('change', handler);
-    return () => mq.removeEventListener?.('change', handler);
-  }, []);
-  return reduced;
-};
-
-// --- Visibility ratios (0..1) for each tile (continuous; no thresholds) ---
-const buildThresholds = (steps = 24) =>
-  Array.from({ length: steps + 1 }, (_, i) => i / steps);
-
-const useVisibilityRatios = (itemRefs) => {
-  const [ratiosState, setRatiosState] = useState([]);
-  const rafLock = useRef(false);
-  const ratios = useRef([]);
-
-  useEffect(() => {
-    ratios.current = new Array(itemRefs.current.length).fill(0);
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          const idx = Number(entry.target.getAttribute("data-idx"));
-          ratios.current[idx] = entry.intersectionRatio;
-        });
-        if (!rafLock.current) {
-          rafLock.current = true;
-          requestAnimationFrame(() => {
-            rafLock.current = false;
-            setRatiosState(ratios.current.slice());
-          });
-        }
-      },
-      { threshold: buildThresholds(24) }
-    );
-
-    itemRefs.current.forEach((el, idx) => {
-      if (!el) return;
-      el.setAttribute("data-idx", String(idx));
-      observer.observe(el);
-    });
-
-    return () => observer.disconnect();
-  }, [itemRefs]);
-
-  return ratiosState;
-};
-
 // --- Layout wrapper ---
 const LayoutWrapper = ({ children, isHomePage = false }) => (
   <div className={`min-h-screen flex flex-col font-['Courier_New',_monospace] text-left items-start w-full overflow-x-hidden ${isHomePage ? "" : "px-4 sm:px-6 md:px-8"}`}>
@@ -187,7 +115,7 @@ const LayoutWrapper = ({ children, isHomePage = false }) => (
   </div>
 );
 
-// --- Navigation with optional glass layer on scroll ---
+// --- Navigation (glass on scroll for furniture pages) ---
 const Navigation = ({ hideOnHome = false, glass = false, glassActive = false }) => {
   const { navigateWithTransition } = React.useContext(PageTransitionContext);
   if (hideOnHome) return null;
@@ -218,12 +146,11 @@ const Footer = () => (
   <footer className="w-full py-12 px-4 sm:px-6 md:px-8 text-left mt-16 font-['Courier_New',_monospace] text-gray-600" />
 );
 
-// --- Home Page (no Navigation on top now) ---
+// --- Home Page (kept as before) ---
 const Home = () => {
   const { navigateWithTransition } = React.useContext(PageTransitionContext);
   return (
     <LayoutWrapper isHomePage={true}>
-      {/* Navigation hidden on Home */}
       <div className="relative w-full h-screen">
         <img
           src={`${import.meta.env.BASE_URL}images/frontpage_images/all-1.JPEG`}
@@ -255,90 +182,33 @@ const Home = () => {
   );
 };
 
-/* --------- Furniture Index (list) --------- */
+/* --------- Furniture Index (simple, flicker-free) --------- */
+// Minimal: native page scroll only. Overlay fades on desktop hover; on mobile it stays steady.
+// Rectangular corners everywhere.
 
-// Continuous overlay/label based on ratio (touch); desktop keeps hover reveal
-const GalleryTile = React.memo(function GalleryTile({ src, label, ratio, isTouch, reducedMotion }) {
-  // Smooth mapping: ignore tiny intersections and ease out near 1
-  // t in [0,1], where t=0 before ~20% visible, t=1 at full visibility
-  const t = Math.max(0, Math.min(1, (ratio - 0.2) / 0.6));
-  const eased = reducedMotion ? t : Math.pow(t, 1.6);
-
-  // Touch: overlay fades out with visibility; Desktop: hover controls overlay
-  const overlayOpacity = isTouch ? (1 - eased) : 1;
-
-  // Touch: label fades in with visibility; Desktop: label on hover
-  const labelOpacity = isTouch ? eased : 0;
-
+const GalleryTile = React.memo(function GalleryTile({ src, label }) {
   return (
-    <div className="relative w-72 sm:w-80 will-change-transform mx-auto">
-      {/* Overlay */}
-      <div
-        className={`absolute inset-0 bg-gradient-to-b from-white/90 to-white/30 transition-opacity duration-200 ${!isTouch ? 'group-hover:opacity-0' : ''}`}
-        style={isTouch ? { opacity: overlayOpacity } : undefined}
-      />
-      {/* Image */}
+    <div className="relative w-72 sm:w-80 mx-auto group">
+      {/* Overlay (steady by default; fades out on desktop hover). No rounded corners. */}
+      <div className="absolute inset-0 bg-gradient-to-b from-white/70 to-white/20 opacity-100 transition-opacity duration-200 group-hover:opacity-0" />
       <img
         src={src}
         alt={label}
         className="w-full h-auto object-cover block mx-auto"
         loading="lazy"
         decoding="async"
-        // subtle image brightening as it becomes visible on touch
-        style={isTouch && !reducedMotion ? { opacity: 0.9 + 0.1 * eased } : undefined}
       />
-      {/* Label */}
-      <div
-        className={`mt-2 text-left transition-opacity duration-200 ${!isTouch ? 'opacity-0 group-hover:opacity-100' : ''}`}
-        style={isTouch ? { opacity: labelOpacity } : undefined}
-      >
+      {/* Label (appears on desktop hover). */}
+      <div className="mt-2 text-left opacity-0 transition-opacity duration-200 group-hover:opacity-100">
         <h2 className="text-center sm:text-left text-sm font-light text-gray-600">{label}</h2>
       </div>
     </div>
   );
 });
 
-function ListWithContinuousReveal({ items, basePath }) {
-  const isTouch = useIsTouch();
-  const reducedMotion = usePrefersReducedMotion();
-
-  // Item refs for IO
-  const itemRefs = useRef([]);
-  itemRefs.current = useMemo(() => new Array(items.length).fill(null), [items.length]);
-
-  // Continuous visibility ratios (0..1)
-  const ratios = useVisibilityRatios(itemRefs);
-
-  return (
-    <div className="w-full flex justify-center pt-28">
-      <div className="w-full max-w-xl flex flex-col items-center gap-14 sm:gap-16 pb-20">
-        {items.map((item, idx) => (
-          <TransitionLink to={`${basePath}/${item.id}`} key={item.id}>
-            <div
-              ref={(el) => (itemRefs.current[idx] = el)}
-              style={{ scrollMarginTop: "6rem", scrollMarginBottom: "6rem" }}
-              className="group"
-            >
-              <GalleryTile
-                src={item.images[0]}
-                label={item.name}
-                ratio={ratios?.[idx] ?? 0}
-                isTouch={isTouch}
-                reducedMotion={reducedMotion}
-              />
-            </div>
-          </TransitionLink>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// Renamed to avoid redeclaration conflicts
 const FurnitureIndexPage = React.memo(function FurnitureIndexPage() {
   const [scrolled, setScrolled] = useState(false);
 
-  // Glass nav after small scroll
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
     onScroll();
@@ -349,12 +219,20 @@ const FurnitureIndexPage = React.memo(function FurnitureIndexPage() {
   return (
     <LayoutWrapper>
       <Navigation glass glassActive={scrolled} />
-      <ListWithContinuousReveal items={furnitureList} basePath="/furniture" />
+      <div className="w-full flex justify-center pt-28">
+        <div className="w-full max-w-xl flex flex-col items-center gap-14 sm:gap-16 pb-20">
+          {furnitureList.map((item) => (
+            <TransitionLink to={`/furniture/${item.id}`} key={item.id}>
+              <GalleryTile src={item.images[0]} label={item.name} />
+            </TransitionLink>
+          ))}
+        </div>
+      </div>
     </LayoutWrapper>
   );
 });
 
-/* --------- Furniture Detail (carousel) --------- */
+/* --------- Furniture Detail (carousel: rectangular, no captions, no 'Fyll') --------- */
 
 function useSwipe(onLeft, onRight) {
   const startX = useRef(0);
@@ -371,10 +249,7 @@ function useSwipe(onLeft, onRight) {
     if (!tracking.current) return;
     const dx = e.touches[0].clientX - startX.current;
     const dy = e.touches[0].clientY - startY.current;
-    // allow vertical scroll
-    if (Math.abs(dy) > Math.abs(dx) * 1.2) {
-      tracking.current = false;
-    }
+    if (Math.abs(dy) > Math.abs(dx) * 1.2) tracking.current = false; // allow natural vertical scroll
   };
   const onTouchEnd = (e) => {
     if (!tracking.current) return;
@@ -391,7 +266,6 @@ function useSwipe(onLeft, onRight) {
 
 const Carousel = ({ images, name }) => {
   const [idx, setIdx] = useState(0);
-  const [fit, setFit] = useState("contain"); // 'contain' | 'cover'
   const total = images.length;
 
   const go = useCallback((n) => {
@@ -400,13 +274,7 @@ const Carousel = ({ images, name }) => {
 
   const goTo = (i) => setIdx(i);
 
-  // Captions: use defaults if none provided
-  const captions = useMemo(
-    () => images.map((_, i) => `${name} – Bilde ${i + 1}`),
-    [images, name]
-  );
-
-  // Keyboard left/right on container
+  // Keyboard left/right
   const wrapRef = useRef(null);
   useEffect(() => {
     const el = wrapRef.current;
@@ -423,30 +291,14 @@ const Carousel = ({ images, name }) => {
 
   return (
     <div ref={wrapRef} tabIndex={0} className="w-full max-w-3xl mx-auto outline-none select-none">
-      {/* Controls row */}
-      <div className="flex items-center justify-between mb-2">
-        <div className="text-sm text-gray-600">{idx + 1} / {total}</div>
-        <button
-          type="button"
-          onClick={() => setFit((f) => (f === "contain" ? "cover" : "contain"))}
-          className="text-sm px-3 py-1.5 border border-gray-300 rounded-md hover:bg-gray-50"
-          aria-pressed={fit === "cover"}
-          aria-label={fit === "cover" ? "Bytt til tilpass" : "Bytt til fyll"}
-          title={fit === "cover" ? "Tilpass" : "Fyll"}
-        >
-          {fit === "cover" ? "Tilpass" : "Fyll"}
-        </button>
-      </div>
-
-      {/* Stage */}
+      {/* Stage: rectangular, no rounded corners, no captions, object-contain */}
       <div
-        className="relative w-full aspect-[4/3] bg-white border border-gray-200 rounded-xl overflow-hidden"
+        className="relative w-full aspect-[4/3] bg-white border border-gray-200 overflow-hidden"
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
         aria-roledescription="karusell"
       >
-        {/* Slides */}
         <div
           className="w-full h-full flex transition-transform duration-500 ease-out"
           style={{ transform: `translateX(-${idx * 100}%)` }}
@@ -457,7 +309,7 @@ const Carousel = ({ images, name }) => {
               <img
                 src={src}
                 alt={`${name} – bilde ${i + 1}`}
-                className={`max-w-full max-h-full block ${fit === "contain" ? "object-contain" : "object-cover w-full h-full"}`}
+                className="max-w-full max-h-full object-contain block"
                 loading={i === idx ? "eager" : "lazy"}
                 decoding="async"
               />
@@ -465,12 +317,12 @@ const Carousel = ({ images, name }) => {
           ))}
         </div>
 
-        {/* Arrows */}
+        {/* Arrows: rectangular (no circles, no rounded corners) */}
         <button
           type="button"
           aria-label="Forrige"
           onClick={() => go(-1)}
-          className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white/90 rounded-full w-10 h-10 flex items-center justify-center shadow"
+          className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-900 w-10 h-10 flex items-center justify-center border border-gray-300"
         >
           ‹
         </button>
@@ -478,18 +330,13 @@ const Carousel = ({ images, name }) => {
           type="button"
           aria-label="Neste"
           onClick={() => go(1)}
-          className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white/90 rounded-full w-10 h-10 flex items-center justify-center shadow"
+          className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-900 w-10 h-10 flex items-center justify-center border border-gray-300"
         >
           ›
         </button>
-
-        {/* Caption overlay */}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-white/90 to-white/0 p-3">
-          <div className="text-center text-sm text-gray-800">{captions[idx]}</div>
-        </div>
       </div>
 
-      {/* Thumbnails */}
+      {/* Thumbnails: rectangular, no rounded corners */}
       <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
         {images.map((src, i) => (
           <button
@@ -497,8 +344,8 @@ const Carousel = ({ images, name }) => {
             key={i}
             aria-label={`Bilde ${i + 1}`}
             onClick={() => goTo(i)}
-            className={`shrink-0 border ${i === idx ? 'border-gray-700' : 'border-gray-300'} rounded-md p-0.5`}
-            title={captions[i]}
+            className={`shrink-0 border ${i === idx ? 'border-gray-900' : 'border-gray-300'} p-0.5`}
+            title={`${name} – bilde ${i + 1}`}
           >
             <img
               src={src}
@@ -532,7 +379,7 @@ const FurnitureDetail = () => {
           </p>
           <a
             href={`mailto:hannahjelmeland@gmail.com?subject=Interesse for ${encodeURIComponent(item.name)}`}
-            className="self-start inline-block bg-gray-700 text-white px-5 py-3 rounded-md hover:bg-gray-800 transition font-light text-sm sm:text-base"
+            className="self-start inline-block bg-gray-700 text-white px-5 py-3 hover:bg-gray-800 transition font-light text-sm sm:text-base"
           >
             Vis interesse
           </a>
