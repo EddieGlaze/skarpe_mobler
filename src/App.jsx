@@ -25,36 +25,6 @@ const furnitureList = [
     `${import.meta.env.BASE_URL}images/hylle_a/Hylle_A_6.jpg`,
     `${import.meta.env.BASE_URL}images/hylle_a/Hylle_A_7.jpg`,
   ]},
-  { id: "table2", name: "Skarpt Bord II", images: [
-    `${import.meta.env.BASE_URL}images/table/table-2.JPEG`,
-    `${import.meta.env.BASE_URL}images/table/table-1.JPEG`,
-    `${import.meta.env.BASE_URL}images/table/table-3.JPEG`,
-  ]},
-  { id: "chair2", name: "Skarp Stol II", images: [
-    `${import.meta.env.BASE_URL}images/chair/chair-2.JPEG`,
-    `${import.meta.env.BASE_URL}images/chair/chair-1.JPEG`,
-    `${import.meta.env.BASE_URL}images/chair/chair-3.JPEG`,
-  ]},
-  { id: "shelf2", name: "Skarp Hylle II", images: [
-    `${import.meta.env.BASE_URL}images/shelf/shelf-2.JPEG`,
-    `${import.meta.env.BASE_URL}images/shelf/shelf-1.JPEG`,
-    `${import.meta.env.BASE_URL}images/shelf/shelf-3.JPEG`,
-  ]},
-  { id: "table3", name: "Skarpt Bord III", images: [
-    `${import.meta.env.BASE_URL}images/table/table-3.JPEG`,
-    `${import.meta.env.BASE_URL}images/table/table-1.JPEG`,
-    `${import.meta.env.BASE_URL}images/table/table-2.JPEG`,
-  ]},
-  { id: "chair3", name: "Skarp Stol III", images: [
-    `${import.meta.env.BASE_URL}images/chair/chair-3.JPEG`,
-    `${import.meta.env.BASE_URL}images/chair/chair-1.JPEG`,
-    `${import.meta.env.BASE_URL}images/chair/chair-2.JPEG`,
-  ]},
-  { id: "shelf3", name: "Skarp Hylle III", images: [
-    `${import.meta.env.BASE_URL}images/shelf/shelf-3.JPEG`,
-    `${import.meta.env.BASE_URL}images/shelf/shelf-1.JPEG`,
-    `${import.meta.env.BASE_URL}images/shelf/shelf-2.JPEG`,
-  ]},
 ];
 
 // --- Page transition context ---
@@ -141,7 +111,6 @@ const useScrollFocusIndex = (refs) => {
         const rect = el.getBoundingClientRect();
         const elCenter = rect.top + rect.height / 2;
         const delta = Math.abs(centerY - elCenter);
-        // Only consider if at least partially in viewport
         const isVisible = rect.bottom > 0 && rect.top < window.innerHeight;
         if (isVisible && delta < bestDelta) { bestDelta = delta; bestIdx = idx; }
       });
@@ -159,10 +128,10 @@ const useScrollFocusIndex = (refs) => {
     };
   }, [refs, isTouch]);
 
-  return isTouch ? focusIndex : -1; // -1 disables on non-touch (desktop uses hover)
+  return isTouch ? focusIndex : -1;
 };
 
-// Wrapper: responsive page padding and readable line-length on mobile
+// Layout wrapper
 const LayoutWrapper = ({ children, isHomePage = false }) => (
   <div className={`min-h-screen flex flex-col font-['Courier_New',_monospace] text-left items-start ${isHomePage ? "" : "px-4 sm:px-6 md:px-8"}`}>
     <div className="flex-grow w-full">{children}</div>
@@ -170,7 +139,7 @@ const LayoutWrapper = ({ children, isHomePage = false }) => (
   </div>
 );
 
-// Navigation: Furniture only (Projects/Drawings hidden)
+// --- Navigation (now includes Hjem + Møbler on all pages) ---
 const Navigation = () => {
   const { navigateWithTransition } = React.useContext(PageTransitionContext);
   return (
@@ -184,8 +153,8 @@ const Navigation = () => {
       </a>
       <span className="text-xs sm:text-sm font-light break-words pr-2">Contact: edvard@glazebrook.com | +47 123 45 678</span>
       <nav className="flex justify-start w-full max-w-md text-base sm:text-lg font-light mt-2 gap-4 sm:gap-6">
-        <TransitionLink to="/furniture" className="hover:underline text-left">Furniture</TransitionLink>
-        {/* Projects and Drawings links removed */}
+        <TransitionLink to="/" className="hover:underline text-left">Hjem</TransitionLink>
+        <TransitionLink to="/furniture" className="hover:underline text-left">Møbler</TransitionLink>
       </nav>
     </div>
   );
@@ -195,11 +164,12 @@ const Footer = () => (
   <footer className="w-full py-12 px-4 sm:px-6 md:px-8 text-left mt-16 font-['Courier_New',_monospace] text-gray-600" />
 );
 
-// Home: Furniture only (Projects/Drawings links removed)
+// Home Page
 const Home = () => {
   const { navigateWithTransition } = React.useContext(PageTransitionContext);
   return (
     <LayoutWrapper isHomePage={true}>
+      <Navigation />
       <div className="relative w-full h-screen">
         <img src={`${import.meta.env.BASE_URL}images/frontpage_images/all-1.JPEG`} alt="Industrial Furniture" className="w-full h-full object-cover" />
         <div className="absolute top-0 left-0 w-full pt-4 sm:pt-8 px-4 sm:px-6 md:px-8 text-left">
@@ -207,13 +177,19 @@ const Home = () => {
           <span className="text-xs sm:text-sm font-light text-white">Contact: edvard@glazebrook.com | +47 123 45 678</span>
           <div className="mt-4 sm:mt-6 flex gap-4 sm:gap-6">
             <a
+              href="/"
+              onClick={(e) => { e.preventDefault(); navigateWithTransition('/'); }}
+              className="hover:underline text-white text-base sm:text-xl font-light"
+            >
+              Hjem
+            </a>
+            <a
               href="/furniture"
               onClick={(e) => { e.preventDefault(); navigateWithTransition('/furniture'); }}
               className="hover:underline text-white text-base sm:text-xl font-light"
             >
-              Furniture
+              Møbler
             </a>
-            {/* Projects/Drawings buttons removed */}
           </div>
         </div>
       </div>
@@ -221,11 +197,10 @@ const Home = () => {
   );
 };
 
-// Tile and list components
+// --- Furniture pages ---
 function GalleryTile({ src, label, inFocus }) {
   return (
     <div className="relative w-72 sm:w-80">
-      {/* Overlay: default visible, disappears on hover (desktop) OR when inFocus (touch) */}
       <div className={`absolute inset-0 bg-gradient-to-b from-white/90 to-white/30 transition-opacity duration-300 ${inFocus ? 'opacity-0' : 'opacity-100 group-hover:opacity-0'}`}></div>
       <img src={src} alt={label} className="w-full h-auto object-cover" />
       <div className={`mt-2 text-left transition-opacity duration-300 ${inFocus ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
@@ -255,7 +230,6 @@ function ListWithFocus({ items, basePath }) {
   );
 }
 
-// Furniture pages (active)
 const FurniturePage = () => (
   <LayoutWrapper>
     <Navigation />
@@ -284,19 +258,12 @@ const FurnitureDetail = () => {
   );
 };
 
-// App routes: only Home and Furniture; anything else redirects to "/"
+// --- Routes ---
 const AppContent = () => (
   <Routes>
     <Route path="/" element={<Home />} />
     <Route path="/furniture" element={<FurniturePage />} />
     <Route path="/furniture/:id" element={<FurnitureDetail />} />
-    {/* Deactivated:
-    <Route path="/projects" element={<ProjectsPage />} />
-    <Route path="/projects/:id" element={<ProjectDetail />} />
-    <Route path="/drawings" element={<DrawingsPage />} />
-    <Route path="/drawings/:id" element={<DrawingDetail />} />
-    */}
-    {/* Redirect any other paths (including old Projects/Drawings URLs) to Home */}
     <Route path="*" element={<Navigate to="/" replace />} />
   </Routes>
 );
