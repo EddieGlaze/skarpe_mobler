@@ -144,6 +144,7 @@ const buildThresholds = (steps = 20) =>
 const useFocusByIntersection = (itemRefs) => {
   const isTouch = useIsTouch();
   const [focusIndex, setFocusIndex] = useState(-1);
+  const [ratiosState, setRatiosState] = useState([]); // expose ratios for crossfade
   const rafLock = useRef(false);
   const ratios = useRef([]);
 
@@ -161,7 +162,8 @@ const useFocusByIntersection = (itemRefs) => {
           rafLock.current = true;
           requestAnimationFrame(() => {
             rafLock.current = false;
-            const arr = ratios.current;
+            const arr = ratios.current.slice();
+            // find best visible
             let best = 0;
             let bestIdx = 0;
             for (let i = 0; i < arr.length; i++) {
@@ -171,6 +173,7 @@ const useFocusByIntersection = (itemRefs) => {
               }
             }
             setFocusIndex(bestIdx);
+            setRatiosState(arr);
           });
         }
       },
@@ -187,12 +190,12 @@ const useFocusByIntersection = (itemRefs) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isTouch]);
 
-  return isTouch ? focusIndex : -1;
+  return { focusIndex: isTouch ? focusIndex : -1, ratios: ratiosState };
 };
 
 // Wrapper: responsive page padding and readable line-length on mobile
 const LayoutWrapper = ({ children, isHomePage = false }) => (
-  <div className={`min-h-screen flex flex-col font-['Courier_New',_monospace] text-left items-start ${isHomePage ? "" : "px-4 sm:px-6 md:px-8"}`}>
+  <div className={`min-h-screen flex flex-col font-['Courier_New',_monospace] text-left items-start w-full overflow-x-hidden ${isHomePage ? "" : "px-4 sm:px-6 md:px-8"}`}>
     <div className="flex-grow w-full">{children}</div>
     {!isHomePage && <Footer />}
   </div>
@@ -235,7 +238,7 @@ const Home = () => {
         <img
           src={`${import.meta.env.BASE_URL}images/frontpage_images/all-1.JPEG`}
           alt="Industrial Furniture"
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover block"
         />
         <div className="absolute top-0 left-0 w-full pt-4 sm:pt-8 px-4 sm:px-6 md:px-8 text-left">
           <a href="/" className="block text-3xl sm:text-4xl md:text-5xl font-light mb-1 text-white uppercase font-['Courier_New',_monospace]">Studio Glazebrook</a>
@@ -262,8 +265,11 @@ const Home = () => {
   );
 };
 
-// --- Furniture pages (single page scroll + softer snapping) ---
-const GalleryTile = React.memo(function GalleryTile({ src, label, inFocus, reducedMotion }) {
+// --- Furniture pages (single page scroll + softer snapping + crossfade) ---
+const GalleryTile = React.memo(function GalleryTile({ src, label, inFocus, reducedMotion, visibilityRatio }) {
+  // Subtle crossfade: 0.85 -> 1.0 as the tile becomes fully visible
+  const imgOpacity = reducedMotion ? 1 : Math.min(1, 0.85 + 0.15 * (visibilityRatio || 0));
+
   const baseLabel = "mt-2 text-left transition-opacity";
   const labelClass = reducedMotion
     ? `${baseLabel}`
@@ -274,17 +280,18 @@ const GalleryTile = React.memo(function GalleryTile({ src, label, inFocus, reduc
     : `absolute inset-0 bg-gradient-to-b from-white/90 to-white/30 transition-opacity duration-500 ${inFocus ? 'opacity-0' : 'opacity-100 group-hover:opacity-0'}`;
 
   return (
-    <div className="relative w-72 sm:w-80 will-change-transform">
+    <div className="relative w-72 sm:w-80 will-change-transform mx-auto">
       <div className={overlayClass}></div>
       <img
         src={src}
         alt={label}
-        className="w-full h-auto object-cover"
+        className="w-full h-auto object-cover block mx-auto"
         loading="lazy"
         decoding="async"
+        style={{ opacity: imgOpacity }}
       />
       <div className={labelClass}>
-        <h2 className="text-sm font-light text-gray-600">{label}</h2>
+        <h2 className="text-center sm:text-left text-sm font-light text-gray-600">{label}</h2>
       </div>
     </div>
   );
@@ -298,12 +305,12 @@ function ListWithFocus({ items, basePath }) {
   const itemRefs = useRef([]);
   itemRefs.current = useMemo(() => new Array(items.length).fill(null), [items.length]);
 
-  // Focus index via IntersectionObserver (viewport root)
-  const focusIndex = useFocusByIntersection(itemRefs);
+  // Focus index + visibility ratios (viewport root)
+  const { focusIndex, ratios } = useFocusByIntersection(itemRefs);
 
   return (
-    <div className="flex justify-center pt-28">
-      <div className="flex flex-col items-center gap-14 sm:gap-16 max-w-xl pb-20">
+    <div className="w-full flex justify-center pt-28">
+      <div className="w-full max-w-xl flex flex-col items-center gap-14 sm:gap-16 pb-20">
         {items.map((item, idx) => (
           <TransitionLink to={`${basePath}/${item.id}`} key={item.id}>
             <div
@@ -316,6 +323,7 @@ function ListWithFocus({ items, basePath }) {
                 label={item.name}
                 inFocus={focusIndex === idx}
                 reducedMotion={reducedMotion}
+                visibilityRatio={ratios?.[idx] ?? 0}
               />
             </div>
           </TransitionLink>
@@ -371,7 +379,7 @@ const FurnitureDetail = () => {
               key={idx}
               src={img}
               alt={`${item.name} ${idx + 1}`}
-              className="mb-6 sm:mb-8 w-full max-w-3xl object-contain"
+              className="mb-6 sm:mb-8 w-full max-w-3xl object-contain block mx-auto"
               loading="lazy"
               decoding="async"
             />
