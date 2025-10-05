@@ -107,6 +107,24 @@ const TransitionLink = ({ to, children, className = "" }) => {
   );
 };
 
+// --- Helpers ---
+const useIsTouch = () => {
+  const [isTouch, setIsTouch] = useState(() =>
+    (typeof window !== 'undefined'
+      ? window.matchMedia('(hover: none) and (pointer: coarse)').matches
+      : false)
+  );
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const mq = window.matchMedia('(hover: none) and (pointer: coarse)');
+    const handler = (e) => setIsTouch(e.matches);
+    setIsTouch(mq.matches);
+    mq.addEventListener?.('change', handler);
+    return () => mq.removeEventListener?.('change', handler);
+  }, []);
+  return isTouch;
+};
+
 // --- Layout wrapper ---
 const LayoutWrapper = ({ children, isHomePage = false }) => (
   <div className={`min-h-screen flex flex-col font-['Courier_New',_monospace] text-left items-start w-full overflow-x-hidden ${isHomePage ? "" : "px-4 sm:px-6 md:px-8"}`}>
@@ -146,7 +164,7 @@ const Footer = () => (
   <footer className="w-full py-12 px-4 sm:px-6 md:px-8 text-left mt-16 font-['Courier_New',_monospace] text-gray-600" />
 );
 
-// --- Home Page (kept as before) ---
+// --- Home Page ---
 const Home = () => {
   const { navigateWithTransition } = React.useContext(PageTransitionContext);
   return (
@@ -183,14 +201,19 @@ const Home = () => {
 };
 
 /* --------- Furniture Index (simple, flicker-free) --------- */
-// Minimal: native page scroll only. Overlay fades on desktop hover; on mobile it stays steady.
-// Rectangular corners everywhere.
+// Mobile: no overlay/fade at all.
+// Desktop: steady overlay that fades away on hover.
 
 const GalleryTile = React.memo(function GalleryTile({ src, label }) {
+  const isTouch = useIsTouch();
+
   return (
     <div className="relative w-72 sm:w-80 mx-auto group">
-      {/* Overlay (steady by default; fades out on desktop hover). No rounded corners. */}
-      <div className="absolute inset-0 bg-gradient-to-b from-white/70 to-white/20 opacity-100 transition-opacity duration-200 group-hover:opacity-0" />
+      {/* Desktop-only overlay (fades on hover). Not rendered on touch. */}
+      {!isTouch && (
+        <div className="absolute inset-0 bg-gradient-to-b from-white/70 to-white/20 opacity-100 transition-opacity duration-200 group-hover:opacity-0" />
+      )}
+
       <img
         src={src}
         alt={label}
@@ -198,8 +221,9 @@ const GalleryTile = React.memo(function GalleryTile({ src, label }) {
         loading="lazy"
         decoding="async"
       />
-      {/* Label (appears on desktop hover). */}
-      <div className="mt-2 text-left opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+
+      {/* Label: always visible on mobile; hover-reveal on desktop */}
+      <div className={`mt-2 text-left ${isTouch ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 transition-opacity duration-200'}`}>
         <h2 className="text-center sm:text-left text-sm font-light text-gray-600">{label}</h2>
       </div>
     </div>
@@ -232,7 +256,7 @@ const FurnitureIndexPage = React.memo(function FurnitureIndexPage() {
   );
 });
 
-/* --------- Furniture Detail (carousel: rectangular, no captions, no 'Fyll') --------- */
+/* --------- Furniture Detail (carousel) --------- */
 
 function useSwipe(onLeft, onRight) {
   const startX = useRef(0);
@@ -249,7 +273,7 @@ function useSwipe(onLeft, onRight) {
     if (!tracking.current) return;
     const dx = e.touches[0].clientX - startX.current;
     const dy = e.touches[0].clientY - startY.current;
-    if (Math.abs(dy) > Math.abs(dx) * 1.2) tracking.current = false; // allow natural vertical scroll
+    if (Math.abs(dy) > Math.abs(dx) * 1.2) tracking.current = false; // let vertical scroll pass
   };
   const onTouchEnd = (e) => {
     if (!tracking.current) return;
@@ -289,9 +313,19 @@ const Carousel = ({ images, name }) => {
 
   const { onTouchStart, onTouchMove, onTouchEnd } = useSwipe(() => go(1), () => go(-1));
 
+  // Thumbnails "follow": keep active thumb centered/visible
+  const thumbStripRef = useRef(null);
+  const thumbRefs = useRef([]);
+  useEffect(() => {
+    const el = thumbRefs.current[idx];
+    if (el && el.scrollIntoView) {
+      el.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+    }
+  }, [idx]);
+
   return (
     <div ref={wrapRef} tabIndex={0} className="w-full max-w-3xl mx-auto outline-none select-none">
-      {/* Stage: rectangular, no rounded corners, no captions, object-contain */}
+      {/* Stage: rectangular, object-contain */}
       <div
         className="relative w-full aspect-[4/3] bg-white border border-gray-200 overflow-hidden"
         onTouchStart={onTouchStart}
@@ -317,12 +351,12 @@ const Carousel = ({ images, name }) => {
           ))}
         </div>
 
-        {/* Arrows: rectangular (no circles, no rounded corners) */}
+        {/* Arrows: smaller, rectangular (no circles) */}
         <button
           type="button"
           aria-label="Forrige"
           onClick={() => go(-1)}
-          className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-900 w-10 h-10 flex items-center justify-center border border-gray-300"
+          className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/85 hover:bg-white text-gray-900 w-8 h-8 flex items-center justify-center border border-gray-300 text-base"
         >
           ‹
         </button>
@@ -330,18 +364,19 @@ const Carousel = ({ images, name }) => {
           type="button"
           aria-label="Neste"
           onClick={() => go(1)}
-          className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-900 w-10 h-10 flex items-center justify-center border border-gray-300"
+          className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/85 hover:bg-white text-gray-900 w-8 h-8 flex items-center justify-center border border-gray-300 text-base"
         >
           ›
         </button>
       </div>
 
-      {/* Thumbnails: rectangular, no rounded corners */}
-      <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
+      {/* Thumbnails: rectangular; active border; auto-follow */}
+      <div ref={thumbStripRef} className="mt-4 flex gap-2 overflow-x-auto pb-1">
         {images.map((src, i) => (
           <button
             type="button"
             key={i}
+            ref={(el) => (thumbRefs.current[i] = el)}
             aria-label={`Bilde ${i + 1}`}
             onClick={() => goTo(i)}
             className={`shrink-0 border ${i === idx ? 'border-gray-900' : 'border-gray-300'} p-0.5`}
@@ -375,7 +410,7 @@ const FurnitureDetail = () => {
 
           <h1 className="text-2xl sm:text-3xl font-light mt-6 mb-2 text-gray-600 text-left w-full">{item.name}</h1>
           <p className="mb-4 font-light text-gray-600 text-left w-full text-sm sm:text-base">
-            Ønsker du mer informasjon eller å gå videre? Trykk under:
+            Estimert leveringstid: 4-6 uker. Pris på forespørsel.
           </p>
           <a
             href={`mailto:hannahjelmeland@gmail.com?subject=Interesse for ${encodeURIComponent(item.name)}`}
