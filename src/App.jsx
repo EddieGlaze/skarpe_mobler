@@ -199,22 +199,22 @@ async function optimizeImageToWebP(src, targetWidth) {
 }
 
 /**
- * SmartImg with spinner placeholder:
- * - While the optimized/original source is being prepared, we render a centered spinner.
- * - After the <img> receives its source, we keep the spinner over it until 'load' fires.
- * - If anything fails, we fall back to the original image.
+ * SmartImg with wrapper sizing + spinner placeholder:
+ * - `wrapperClassName` controls the outer container size (fixes hero sizing on mobile).
+ * - `className` styles the <img> itself.
  */
 function SmartImg({
   src,
   alt,
   className = "",
+  wrapperClassName = "",
   priority = false,
   capWidth = 1600,
   wrapperRef,
 }) {
-  const mountRef = useRef(null);         // observed element before src is ready
-  const imgElRef = useRef(null);         // actual <img> element once we have a src
-  const [currentSrc, setCurrentSrc] = useState("");   // object URL or original
+  const mountRef = useRef(null);
+  const imgElRef = useRef(null);
+  const [currentSrc, setCurrentSrc] = useState("");
   const [loaded, setLoaded] = useState(false);
   const objectUrlRef = useRef(null);
 
@@ -223,7 +223,6 @@ function SmartImg({
     return el ? el.clientWidth : 800;
   }, [wrapperRef]);
 
-  // Kick off optimization only when visible (unless priority)
   useEffect(() => {
     let io;
     let cancelled = false;
@@ -232,17 +231,15 @@ function SmartImg({
       setLoaded(false);
       const dpr = Math.min(3, window.devicePixelRatio || 1);
       const targetW = Math.min(capWidth, Math.ceil(getContainerWidth() * dpr));
-
       const blob = await optimizeImageToWebP(src, targetW);
       if (cancelled) return;
-
       if (blob) {
         if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
         const url = URL.createObjectURL(blob);
         objectUrlRef.current = url;
         setCurrentSrc(url);
       } else {
-        setCurrentSrc(src); // fallback to original
+        setCurrentSrc(src);
       }
     };
 
@@ -272,10 +269,10 @@ function SmartImg({
     };
   }, [src, priority, capWidth, getContainerWidth]);
 
-  // Placeholder spinner before we even have a src
+  // Before we have a src, show spinner in a sized wrapper
   if (!currentSrc) {
     return (
-      <div ref={mountRef} className={`relative ${className}`}>
+      <div ref={mountRef} className={`relative ${wrapperClassName}`}>
         <div className="absolute inset-0 flex items-center justify-center" role="status" aria-label="Laster bilde">
           <div className="animate-spin w-6 h-6 border border-gray-300 border-t-gray-700" />
         </div>
@@ -283,9 +280,9 @@ function SmartImg({
     );
   }
 
-  // After we have a src, render the image; keep spinner overlay until onLoad
+  // After src, render the image with a spinner overlay until loaded
   return (
-    <div ref={mountRef} className={`relative`}>
+    <div ref={mountRef} className={`relative ${wrapperClassName}`}>
       <img
         ref={imgElRef}
         src={currentSrc}
@@ -329,7 +326,9 @@ const Navigation = ({ hideOnHome = false, glass = false, glassActive = false }) 
       >
         Studio Glazebrook
       </a>
-      <span className="text-xs sm:text-sm font-light break-words pr-2">Contact: edvard@glazebrook.com | +47 123 45 678</span>
+      <span className="text-xs sm:text-sm font-light break-words pr-2">
+        Contact: <a href="mailto:edvaglaz@gmail.com" className="underline hover:no-underline">edvaglaz@gmail.com</a> | +47 942 45 713
+      </span>
       <nav className="flex justify-start w-full max-w-md text-base sm:text-lg font-light mt-2 gap-4 sm:gap-6">
         <TransitionLink to="/" className="hover:underline text-left">Hjem</TransitionLink>
         <TransitionLink to="/furniture" className="hover:underline text-left">Møbler</TransitionLink>
@@ -352,17 +351,33 @@ const Home = () => {
         <SmartImg
           src={`${import.meta.env.BASE_URL}images/frontpage_images/all-1.JPEG`}
           alt="Industrial Furniture"
-          className="w-full h-full object-cover block"
+          // Wrapper fills the viewport; image covers wrapper — full-bleed without letterboxing
+          wrapperClassName="w-full h-full"
+          className="absolute inset-0 w-full h-full object-cover block"
           priority
           capWidth={2200}
           wrapperRef={wrapperRef}
         />
         <div className="absolute top-0 left-0 w-full pt-4 sm:pt-8 px-4 sm:px-6 md:px-8 text-left">
           <a href="/" className="block text-3xl sm:text-4xl md:text-5xl font-light mb-1 text-white uppercase font-['Courier_New',_monospace]">Studio Glazebrook</a>
-          <span className="text-xs sm:text-sm font-light text-white">Contact: edvard@glazebrook.com | +47 123 45 678</span>
+          <span className="text-xs sm:text-sm font-light text-white">
+            Contact: <a href="mailto:edvaglaz@gmail.com" className="underline hover:no-underline">edvaglaz@gmail.com</a> | +47 942 45 713
+          </span>
           <div className="mt-4 sm:mt-6 flex gap-4 sm:gap-6">
-            <a href="/" onClick={(e) => { e.preventDefault(); navigateWithTransition('/'); }} className="hover:underline text-white text-base sm:text-xl font-light">Hjem</a>
-            <a href="/furniture" onClick={(e) => { e.preventDefault(); navigateWithTransition('/furniture'); }} className="hover:underline text-white text-base sm:text-xl font-light">Møbler</a>
+            <a
+              href="/"
+              onClick={(e) => { e.preventDefault(); navigateWithTransition('/'); }}
+              className="hover:underline text-white text-base sm:text-xl font-light"
+            >
+              Hjem
+            </a>
+            <a
+              href="/furniture"
+              onClick={(e) => { e.preventDefault(); navigateWithTransition('/furniture'); }}
+              className="hover:underline text-white text-base sm:text-xl font-light"
+            >
+              Møbler
+            </a>
           </div>
         </div>
       </div>
@@ -371,8 +386,6 @@ const Home = () => {
 };
 
 /* -------------------- Furniture Index -------------------- */
-// Mobile: no overlay/fade. Desktop: overlay fades only on hover.
-
 const GalleryTile = React.memo(function GalleryTile({ src, label }) {
   const isTouch = useIsTouch();
   const wrap = useRef(null);
@@ -470,7 +483,6 @@ const Lightbox = ({ images, startIndex, onClose, name }) => {
     };
   }, [close, go]);
 
-  // swipe down to close (mobile)
   const startY = useRef(0), tracking = useRef(false);
   const onTouchStart = (e) => {
     if (e.touches?.length !== 1) return;
@@ -495,7 +507,6 @@ const Lightbox = ({ images, startIndex, onClose, name }) => {
       role="dialog"
       aria-modal="true"
     >
-      {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-3">
         <div className="text-sm">{idx + 1} / {images.length}</div>
         <button
@@ -505,12 +516,12 @@ const Lightbox = ({ images, startIndex, onClose, name }) => {
         >×</button>
       </div>
 
-      {/* Stage */}
       <div ref={stageRef} className="flex-1 relative">
         <div className="absolute inset-0 flex items-center justify-center">
           <SmartImg
             src={images[idx]}
             alt={`${name} – bilde ${idx + 1}`}
+            wrapperClassName="max-w-[100vw] max-h-[80vh]"
             className="max-w-[100vw] max-h-[80vh] object-contain block"
             priority
             capWidth={2400}
@@ -518,7 +529,6 @@ const Lightbox = ({ images, startIndex, onClose, name }) => {
           />
         </div>
 
-        {/* Arrows */}
         <button
           type="button"
           aria-label="Forrige"
@@ -543,7 +553,6 @@ const Carousel = ({ images, name, onOpenLightbox }) => {
   const go = useCallback((n) => setIdx((cur) => (cur + n + total) % total), [total]);
   const goTo = (i) => setIdx(i);
 
-  // Keyboard left/right
   const wrapRef = useRef(null);
   useEffect(() => {
     const el = wrapRef.current;
@@ -558,7 +567,6 @@ const Carousel = ({ images, name, onOpenLightbox }) => {
 
   const { onTouchStart, onTouchMove, onTouchEnd } = useSwipe(() => go(1), () => go(-1));
 
-  // Thumbnails auto-follow
   const thumbRefs = useRef([]);
   useEffect(() => {
     const el = thumbRefs.current[idx];
@@ -672,7 +680,7 @@ const FurnitureDetail = () => {
 
           {/* Vis interesse button only */}
           <a
-            href={`mailto:hannahjelmeland@gmail.com?subject=Interesse for ${encodeURIComponent(item.name)}`}
+            href={`mailto:edvaglaz@gmail.com?subject=Interesse for ${encodeURIComponent(item.name)}`}
             className="self-start inline-block bg-gray-700 text-white px-5 py-3 hover:bg-gray-800 transition font-light text-sm sm:text-base"
           >
             Vis interesse
