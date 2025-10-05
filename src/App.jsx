@@ -166,9 +166,14 @@ async function optimizeImageToWebP(src, targetWidth) {
       bitmap = { width: c.width, height: c.height, _img: img };
     }
 
-    const scale = Math.min(1, targetWidth / (bitmap.width || bitmap._img.naturalWidth));
-    const tw = Math.max(1, Math.round((bitmap.width || bitmap._img.naturalWidth) * scale));
-    const th = Math.max(1, Math.round((bitmap.height || bitmap._img.naturalHeight) * scale));
+    const srcW = (bitmap.width || bitmap._img.naturalWidth);
+    const srcH = (bitmap.height || bitmap._img.naturalHeight);
+    const scale = Math.min(1, targetWidth / srcW);
+    const tw = Math.max(1, Math.round(srcW * scale));
+    const th = Math.max(1, Math.round(srcH * scale));
+
+    // Slightly higher quality for small outputs to avoid thumbnail blur
+    const q = tw <= 400 ? 0.9 : tw <= 900 ? 0.86 : 0.82;
 
     let outBlob;
     if (typeof OffscreenCanvas !== 'undefined') {
@@ -178,7 +183,7 @@ async function optimizeImageToWebP(src, targetWidth) {
       ctx.imageSmoothingQuality = 'high';
       if (bitmap instanceof ImageBitmap) ctx.drawImage(bitmap, 0, 0, tw, th);
       else ctx.drawImage(bitmap._img, 0, 0, tw, th);
-      if (canvas.convertToBlob) outBlob = await canvas.convertToBlob({ type: 'image/webp', quality: 0.82 });
+      if (canvas.convertToBlob) outBlob = await canvas.convertToBlob({ type: 'image/webp', quality: q });
     }
     if (!outBlob) {
       const c = document.createElement('canvas');
@@ -188,7 +193,7 @@ async function optimizeImageToWebP(src, targetWidth) {
       cx.imageSmoothingQuality = 'high';
       if (bitmap instanceof ImageBitmap) cx.drawImage(bitmap, 0, 0, tw, th);
       else cx.drawImage(bitmap._img, 0, 0, tw, th);
-      outBlob = await new Promise(res => c.toBlob(res, 'image/webp', 0.82));
+      outBlob = await new Promise(res => c.toBlob(res, 'image/webp', q));
     }
 
     await cache.put(key, new Response(outBlob));
@@ -199,9 +204,10 @@ async function optimizeImageToWebP(src, targetWidth) {
 }
 
 /**
- * SmartImg with wrapper sizing + spinner placeholder:
- * - `wrapperClassName` controls the outer container size (fixes hero sizing on mobile).
- * - `className` styles the <img> itself.
+ * SmartImg with:
+ * - higher-density option for tiny images (thumbnails),
+ * - spinner that appears ONLY if load takes > 1s,
+ * - wrapper sizing to prevent layout shift (used on hero).
  */
 function SmartImg({
   src,
@@ -211,11 +217,13 @@ function SmartImg({
   priority = false,
   capWidth = 1600,
   wrapperRef,
+  pixelRatioMultiplier = 1.0, // >1 for extra sharpness on small assets
 }) {
   const mountRef = useRef(null);
-  const imgElRef = useRef(null);
   const [currentSrc, setCurrentSrc] = useState("");
   const [loaded, setLoaded] = useState(false);
+  const [showSpinner, setShowSpinner] = useState(false);
+  const spinnerTimerRef = useRef(null);
   const objectUrlRef = useRef(null);
 
   const getContainerWidth = useCallback(() => {
@@ -223,16 +231,24 @@ function SmartImg({
     return el ? el.clientWidth : 800;
   }, [wrapperRef]);
 
+  // Start image preparation when visible (or immediately if priority)
   useEffect(() => {
     let io;
     let cancelled = false;
 
     const start = async () => {
       setLoaded(false);
+      // Delay spinner to avoid flashes under 1s
+      clearTimeout(spinnerTimerRef.current);
+      setShowSpinner(false);
+      spinnerTimerRef.current = setTimeout(() => setShowSpinner(true), 1000);
+
       const dpr = Math.min(3, window.devicePixelRatio || 1);
-      const targetW = Math.min(capWidth, Math.ceil(getContainerWidth() * dpr));
+      const targetW = Math.min(capWidth, Math.ceil(getContainerWidth() * dpr * pixelRatioMultiplier));
+
       const blob = await optimizeImageToWebP(src, targetW);
       if (cancelled) return;
+
       if (blob) {
         if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
         const url = URL.createObjectURL(blob);
@@ -262,37 +278,40 @@ function SmartImg({
     return () => {
       cancelled = true;
       io?.disconnect();
+      clearTimeout(spinnerTimerRef.current);
       if (objectUrlRef.current) {
         URL.revokeObjectURL(objectUrlRef.current);
         objectUrlRef.current = null;
       }
     };
-  }, [src, priority, capWidth, getContainerWidth]);
+  }, [src, priority, capWidth, getContainerWidth, pixelRatioMultiplier]);
 
-  // Before we have a src, show spinner in a sized wrapper
+  // Before we have a src, draw a clean placeholder (spinner delayed)
   if (!currentSrc) {
     return (
-      <div ref={mountRef} className={`relative ${wrapperClassName}`}>
-        <div className="absolute inset-0 flex items-center justify-center" role="status" aria-label="Laster bilde">
-          <div className="animate-spin w-6 h-6 border border-gray-300 border-t-gray-700" />
-        </div>
+      <div ref={mountRef} className={`relative ${wrapperClassName}`} aria-busy={showSpinner ? "true" : "false"}>
+        {showSpinner && (
+          <div className="absolute inset-0 flex items-center justify-center" role="status" aria-label="Laster bilde">
+            <div className="animate-spin w-6 h-6 border border-gray-300 border-t-gray-700" />
+          </div>
+        )}
       </div>
     );
   }
 
-  // After src, render the image with a spinner overlay until loaded
+  // After src, render image; overlay spinner until natural 'load'
   return (
-    <div ref={mountRef} className={`relative ${wrapperClassName}`}>
+    <div ref={mountRef} className={`relative ${wrapperClassName}`} aria-busy={!loaded ? "true" : "false"}>
       <img
-        ref={imgElRef}
         src={currentSrc}
         alt={alt}
         className={className}
         loading={priority ? "eager" : "lazy"}
         decoding="async"
-        onLoad={() => setLoaded(true)}
+        onLoad={() => { setLoaded(true); clearTimeout(spinnerTimerRef.current); setShowSpinner(false); }}
+        onError={() => { setLoaded(true); clearTimeout(spinnerTimerRef.current); setShowSpinner(false); }}
       />
-      {!loaded && (
+      {(!loaded && showSpinner) && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none" role="status" aria-label="Laster bilde">
           <div className="animate-spin w-6 h-6 border border-gray-300 border-t-gray-700" />
         </div>
@@ -351,7 +370,6 @@ const Home = () => {
         <SmartImg
           src={`${import.meta.env.BASE_URL}images/frontpage_images/all-1.JPEG`}
           alt="Industrial Furniture"
-          // Wrapper fills the viewport; image covers wrapper — full-bleed without letterboxing
           wrapperClassName="w-full h-full"
           className="absolute inset-0 w-full h-full object-cover block"
           priority
@@ -386,6 +404,8 @@ const Home = () => {
 };
 
 /* -------------------- Furniture Index -------------------- */
+// Mobile: no overlay/fade. Desktop: overlay fades only on hover.
+
 const GalleryTile = React.memo(function GalleryTile({ src, label }) {
   const isTouch = useIsTouch();
   const wrap = useRef(null);
@@ -398,7 +418,8 @@ const GalleryTile = React.memo(function GalleryTile({ src, label }) {
         src={src}
         alt={label}
         className="w-full h-auto object-cover block mx-auto"
-        capWidth={700}
+        capWidth={900}
+        pixelRatioMultiplier={1.25}
         wrapperRef={wrap}
       />
       <div className={`mt-2 text-left ${isTouch ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 transition-opacity duration-200'}`}>
@@ -483,6 +504,7 @@ const Lightbox = ({ images, startIndex, onClose, name }) => {
     };
   }, [close, go]);
 
+  // swipe down to close (mobile)
   const startY = useRef(0), tracking = useRef(false);
   const onTouchStart = (e) => {
     if (e.touches?.length !== 1) return;
@@ -567,6 +589,7 @@ const Carousel = ({ images, name, onOpenLightbox }) => {
 
   const { onTouchStart, onTouchMove, onTouchEnd } = useSwipe(() => go(1), () => go(-1));
 
+  // Thumbnails auto-follow
   const thumbRefs = useRef([]);
   useEffect(() => {
     const el = thumbRefs.current[idx];
@@ -632,7 +655,7 @@ const Carousel = ({ images, name, onOpenLightbox }) => {
         >›</button>
       </div>
 
-      {/* Thumbnails */}
+      {/* Thumbnails (extra-sharp) */}
       <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
         {images.map((src, i) => (
           <button
@@ -648,7 +671,8 @@ const Carousel = ({ images, name, onOpenLightbox }) => {
               src={src}
               alt=""
               className="block h-16 w-24 object-cover"
-              capWidth={320}
+              capWidth={480}
+              pixelRatioMultiplier={1.6}
             />
           </button>
         ))}
