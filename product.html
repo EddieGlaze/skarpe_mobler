@@ -19,7 +19,7 @@
     </ul>
   </nav>
 
-  <div class="product-page" id="product-page"></div>
+  <div class="product-layout" id="product-page"></div>
 
   <script src="data.js"></script>
   <script>
@@ -36,35 +36,20 @@
         ? `<div class="product-price">NOK ${product.price.toLocaleString('no-NO')}</div>`
         : '';
 
-      // Last bilder 0.jpg til 20.jpg, vis kun de som finnes
-      const basePath = `images/${product.id}/`;
+      // Lag bildekort — klikk åpner fullt bilde i ny fane
       let imagesHTML = '';
       for (let i = 0; i <= 20; i++) {
-        const src = `${basePath}${i}.jpg`;
-        imagesHTML += `<img src="${src}" alt="${product.name}"
-          onerror="this.style.display='none'"
-          style="height:420px; width:auto; object-fit:cover; flex-shrink:0;">`;
+        const src = `images/${product.id}/${i}.jpg`;
+        imagesHTML += `
+          <a href="${src}" target="_blank">
+            <img src="${src}" alt="${product.name} — bilde ${i}"
+              onerror="this.parentElement.style.display='none'">
+          </a>`;
       }
 
       page.innerHTML = `
-        <div class="product-header">
-          <div>
-            <div class="product-title">${product.number} ${product.name}</div>
-            <div class="product-meta">${product.year}</div>
-          </div>
+        <div class="product-sidebar">
+          <div class="product-title">${product.number} ${product.name}</div>
+          <div class="product-meta">${product.year}</div>
           <div class="product-description">
             <p>${product.description}</p>
-            ${priceHTML}
-            <button class="btn-inquiry"
-              onclick="window.location.href='contact.html?inquiry=${product.id}'">
-              Forespørsel
-            </button>
-          </div>
-        </div>
-        <div class="product-gallery">${imagesHTML}</div>
-      `;
-    }
-  </script>
-
-</body>
-</html>
