@@ -2,24 +2,59 @@ document.addEventListener('DOMContentLoaded', function() {
   const slideshow = document.getElementById('slideshow');
   if (!slideshow) return;
 
-  // Kopier og bland tilfeldig
-  const shuffled = products.slice().sort(function() {
-    return 0.5 - Math.random();
+  // Bygg liste over alle slides med prosjekt-id
+  const allSlides = [];
+  products.forEach(function(p) {
+    const slideImages = p.slides || ["0.jpg"];
+    slideImages.forEach(function(img) {
+      allSlides.push({
+        id: p.id,
+        src: 'images/' + p.id + '/' + img
+      });
+    });
   });
 
-  shuffled.forEach(function(p, index) {
-    const cover = p.coverImage
-      ? 'images/' + p.id + '/' + p.coverImage
-      : 'images/' + p.id + '/0.jpg';
+  // Bland tilfeldig, men ingen to fra samme prosjekt på rad
+  function shuffle(arr) {
+    for (var i = arr.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+    }
+    return arr;
+  }
 
-    const slide = document.createElement('div');
+  function shuffleNoAdjacentDuplicates(arr) {
+    var shuffled = shuffle(arr.slice());
+    var maxAttempts = 100;
+    var attempts = 0;
+    while (attempts < maxAttempts) {
+      var hasDuplicate = false;
+      for (var i = 0; i < shuffled.length - 1; i++) {
+        if (shuffled[i].id === shuffled[i + 1].id) {
+          hasDuplicate = true;
+          break;
+        }
+      }
+      if (!hasDuplicate) break;
+      shuffled = shuffle(shuffled.slice());
+      attempts++;
+    }
+    return shuffled;
+  }
+
+  var ordered = shuffleNoAdjacentDuplicates(allSlides);
+
+  // Lag slides
+  ordered.forEach(function(item, index) {
+    var slide = document.createElement('div');
     slide.className = index === 0 ? 'slide active' : 'slide';
-    slide.style.backgroundImage = 'url(' + cover + ')';
+    slide.style.backgroundImage = 'url(' + item.src + ')';
     slideshow.appendChild(slide);
   });
 
-  const slides = document.querySelectorAll('.slide');
-  let current = 0;
+  // Bytt slide hvert 5. sekund
+  var slides = document.querySelectorAll('.slide');
+  var current = 0;
   setInterval(function() {
     slides[current].classList.remove('active');
     current = (current + 1) % slides.length;
