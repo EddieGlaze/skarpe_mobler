@@ -26,8 +26,10 @@ img { display: block; max-width: 100%; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 48px;
+  padding: 20px 72px;
   background: rgba(255,255,255,0.96);
+  box-sizing: border-box;
+  width: 100vw;
 }
 .nav-logo {
   font-size: 11px;
@@ -72,9 +74,11 @@ body.page-home { overflow: hidden; }
 /* --- Works: produktgrid --- */
 .page-content {
   padding-top: 80px;
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
 }
 .page-title {
-  padding: 48px 48px 32px;
+  padding: 48px 72px 32px;
   font-size: 11px;
   font-weight: 400;
   letter-spacing: 0.2em;
@@ -123,6 +127,7 @@ body.page-home { overflow: hidden; }
   position: relative;
   height: calc(100vh - 60px);
   margin-top: 60px;
+  overflow: hidden;
 }
 
 .product-sidebar {
@@ -167,12 +172,14 @@ body.page-home { overflow: hidden; }
   right: 0;
   bottom: 0;
   overflow-y: scroll;
+  overflow-x: hidden;
   padding: 48px;
   display: flex;
   flex-direction: column;
   gap: 32px;
   align-items: center;
   z-index: 50;
+  scrollbar-gutter: stable;
 }
 
 .product-images img {
@@ -290,23 +297,29 @@ body.page-home { overflow: hidden; }
 
 /* --- Responsiv (mobil) --- */
 @media (max-width: 768px) {
-  #nav { padding: 16px 24px; }
-  .works-grid { grid-template-columns: repeat(2, 1fr); }
-  .text-page { padding-left: 24px; padding-right: 24px; }
-  .page-title { padding: 32px 24px 24px; }
-  .product-layout { height: auto; margin-top: 60px; }
+  #nav { padding: 16px 8px; }
+  .works-grid {
+    grid-template-columns: repeat(2, 1fr);
+    padding: 0 8px 8px;
+    gap: 8px;
+  }
+  .page-title { padding: 24px 8px 16px; }
+  .text-page { padding-left: 16px; padding-right: 16px; }
+  .product-layout { height: auto; margin-top: 60px; overflow: visible; }
   .product-sidebar {
     position: relative;
     top: 0;
     width: 100%;
     height: auto;
-    padding: 24px;
+    padding: 16px;
     background: rgba(255,255,255,0.95);
   }
   .product-images {
     position: relative;
     top: 0;
-    padding: 24px;
+    padding: 16px;
+    overflow-y: visible;
+    scrollbar-gutter: auto;
   }
   .product-images img { width: 100%; }
 }
