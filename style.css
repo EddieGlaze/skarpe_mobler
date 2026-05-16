@@ -256,7 +256,7 @@ body.page-home { overflow: hidden; }
   padding: 48px 48px 48px 0;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 32px;
 }
 
 .product-images a {
@@ -264,7 +264,7 @@ body.page-home { overflow: hidden; }
 }
 
 .product-images img {
-  width: 100%;
+  width: 60%;
   height: auto;
   display: block;
   cursor: zoom-in;
