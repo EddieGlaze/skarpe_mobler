@@ -134,9 +134,9 @@ body.page-home { overflow: hidden; }
   position: fixed;
   top: 60px;
   left: 0;
-  width: 260px;
+  width: 320px;
   height: calc(100vh - 60px);
-  padding: 72px;
+  padding: 48px 72px;
   display: flex;
   flex-direction: column;
   gap: 16px;
