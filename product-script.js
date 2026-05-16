@@ -14,13 +14,18 @@ document.addEventListener('DOMContentLoaded', function() {
     ? '<div class="product-price">NOK ' + product.price.toLocaleString('no-NO') + '</div>'
     : '';
 
-  let imagesHTML = '';
+  // Samle gyldige bilder
+  var validSrcs = [];
   for (var i = 0; i <= 20; i++) {
-    const src = 'images/' + product.id + '/' + i + '.jpg';
-    imagesHTML += '<img src="' + src + '" alt="' + product.name + '" ' +
-      'class="product-thumb" data-src="' + src + '" ' +
-      'onerror="this.style.display=\'none\'">';
+    validSrcs.push('images/' + product.id + '/' + i + '.jpg');
   }
+
+  var imagesHTML = '';
+  validSrcs.forEach(function(src, index) {
+    imagesHTML += '<img src="' + src + '" alt="' + product.name + '" ' +
+      'class="product-thumb" data-index="' + index + '" ' +
+      'onerror="this.style.display=\'none\'">';
+  });
 
   page.innerHTML =
     '<div class="product-sidebar">' +
@@ -31,15 +36,76 @@ document.addEventListener('DOMContentLoaded', function() {
       '<button class="btn-inquiry" onclick="window.location.href=\'contact.html?inquiry=' + product.id + '\'">Forespørsel</button>' +
     '</div>' +
     '<div class="product-images">' + imagesHTML + '</div>' +
-    '<div id="overlay" onclick="this.style.display=\'none\'">' +
+    '<div id="overlay">' +
+      '<div id="overlay-left" title="Forrige"></div>' +
       '<img id="overlay-img" src="">' +
+      '<div id="overlay-right" title="Neste"></div>' +
     '</div>';
 
-  // Klikk på bilde åpner overlay
-  document.querySelectorAll('.product-thumb').forEach(function(img) {
-    img.addEventListener('click', function() {
-      document.getElementById('overlay-img').src = this.dataset.src;
-      document.getElementById('overlay').style.display = 'flex';
+  // Finn alle synlige bilder etter lasting
+  function getVisibleImages() {
+    return Array.from(document.querySelectorAll('.product-thumb')).filter(function(img) {
+      return img.style.display !== 'none' && img.complete && img.naturalWidth > 0;
     });
+  }
+
+  var overlayIndex = 0;
+
+  function openOverlay(index) {
+    var visible = getVisibleImages();
+    if (!visible.length) return;
+    overlayIndex = index;
+    document.getElementById('overlay-img').src = visible[overlayIndex].src;
+    document.getElementById('overlay').style.display = 'flex';
+  }
+
+  function closeOverlay() {
+    document.getElementById('overlay').style.display = 'none';
+  }
+
+  function nextImage() {
+    var visible = getVisibleImages();
+    overlayIndex = (overlayIndex + 1) % visible.length;
+    document.getElementById('overlay-img').src = visible[overlayIndex].src;
+  }
+
+  function prevImage() {
+    var visible = getVisibleImages();
+    overlayIndex = (overlayIndex - 1 + visible.length) % visible.length;
+    document.getElementById('overlay-img').src = visible[overlayIndex].src;
+  }
+
+  // Klikk på bilde åpner overlay
+  document.querySelectorAll('.product-thumb').forEach(function(img, index) {
+    img.addEventListener('click', function() {
+      openOverlay(index);
+    });
+  });
+
+  // Klikk venstre/høyre halvdel
+  document.getElementById('overlay-left').addEventListener('click', function(e) {
+    e.stopPropagation();
+    prevImage();
+  });
+  document.getElementById('overlay-right').addEventListener('click', function(e) {
+    e.stopPropagation();
+    nextImage();
+  });
+
+  // Klikk utenfor bildet lukker
+  document.getElementById('overlay').addEventListener('click', function() {
+    closeOverlay();
+  });
+  document.getElementById('overlay-img').addEventListener('click', function(e) {
+    e.stopPropagation();
+  });
+
+  // Piltaster og Escape
+  document.addEventListener('keydown', function(e) {
+    var overlay = document.getElementById('overlay');
+    if (overlay.style.display !== 'flex') return;
+    if (e.key === 'ArrowRight') nextImage();
+    if (e.key === 'ArrowLeft') prevImage();
+    if (e.key === 'Escape') closeOverlay();
   });
 });
