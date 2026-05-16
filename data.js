@@ -42,7 +42,7 @@ const products = [
     year: 2025,
     description: "Bokhylle i 3 mm rustfritt stål, satt sammen av laserkuttede deler med presise sammenføyninger. Den blanke overflaten reflekterer lys og gir hyllen et rent og ryddig uttrykk. Hyllen står på justerbare føtter og kan plasseres fritt eller inntil vegg.",
     price: null,
-    slides: ["1.jpg","4.jpg"]
+    slides: ["0.jpg","4.jpg"]
   },
   {
     id: "Kaffebord",
