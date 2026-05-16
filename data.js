@@ -37,6 +37,7 @@ const products = [
     number: "05",
     name: "Bord Alufoam",
     year: 2023,
+     coverImage: "2.jpg",
     description: "Kort beskrivelse.",
     price: null
   },
