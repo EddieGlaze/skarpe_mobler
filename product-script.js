@@ -14,7 +14,6 @@ document.addEventListener('DOMContentLoaded', function() {
     ? '<div class="product-price">NOK ' + product.price.toLocaleString('no-NO') + '</div>'
     : '';
 
-  // Samle gyldige bilder
   var validSrcs = [];
   for (var i = 0; i <= 20; i++) {
     validSrcs.push('images/' + product.id + '/' + i + '.jpg');
@@ -37,12 +36,13 @@ document.addEventListener('DOMContentLoaded', function() {
     '</div>' +
     '<div class="product-images">' + imagesHTML + '</div>' +
     '<div id="overlay">' +
-      '<div id="overlay-left" title="Forrige"></div>' +
-      '<img id="overlay-img" src="">' +
-      '<div id="overlay-right" title="Neste"></div>' +
+      '<div id="overlay-img-wrapper">' +
+        '<img id="overlay-img" src="">' +
+        '<div id="overlay-left"></div>' +
+        '<div id="overlay-right"></div>' +
+      '</div>' +
     '</div>';
 
-  // Finn alle synlige bilder etter lasting
   function getVisibleImages() {
     return Array.from(document.querySelectorAll('.product-thumb')).filter(function(img) {
       return img.style.display !== 'none' && img.complete && img.naturalWidth > 0;
@@ -75,32 +75,32 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('overlay-img').src = visible[overlayIndex].src;
   }
 
-  // Klikk på bilde åpner overlay
   document.querySelectorAll('.product-thumb').forEach(function(img, index) {
     img.addEventListener('click', function() {
       openOverlay(index);
     });
   });
 
-  // Klikk venstre/høyre halvdel
   document.getElementById('overlay-left').addEventListener('click', function(e) {
     e.stopPropagation();
     prevImage();
   });
+
   document.getElementById('overlay-right').addEventListener('click', function(e) {
     e.stopPropagation();
     nextImage();
   });
 
-  // Klikk utenfor bildet lukker
+  // Klikk på hvitt utenfor bildet lukker
   document.getElementById('overlay').addEventListener('click', function() {
     closeOverlay();
   });
+
+  // Klikk på wrapper stopper ikke — bare bildet stopper
   document.getElementById('overlay-img').addEventListener('click', function(e) {
     e.stopPropagation();
   });
 
-  // Piltaster og Escape
   document.addEventListener('keydown', function(e) {
     var overlay = document.getElementById('overlay');
     if (overlay.style.display !== 'flex') return;
