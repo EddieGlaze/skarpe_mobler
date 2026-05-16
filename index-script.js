@@ -2,7 +2,12 @@ document.addEventListener('DOMContentLoaded', function() {
   const slideshow = document.getElementById('slideshow');
   if (!slideshow) return;
 
-  products.forEach(function(p, index) {
+  // Kopier og bland tilfeldig
+  const shuffled = products.slice().sort(function() {
+    return 0.5 - Math.random();
+  });
+
+  shuffled.forEach(function(p, index) {
     const cover = p.coverImage
       ? 'images/' + p.id + '/' + p.coverImage
       : 'images/' + p.id + '/0.jpg';
@@ -10,9 +15,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const slide = document.createElement('div');
     slide.className = index === 0 ? 'slide active' : 'slide';
     slide.style.backgroundImage = 'url(' + cover + ')';
-    slide.style.backgroundSize = 'contain';
-    slide.style.backgroundPosition = 'center';
-    slide.style.backgroundRepeat = 'no-repeat';
     slideshow.appendChild(slide);
   });
 
