@@ -269,6 +269,7 @@ body.page-home { overflow: hidden; }
   display: block;
   cursor: zoom-in;
   transition: opacity 0.2s;
+   margin: 0 auto;
 }
 
 .product-images img:hover {
