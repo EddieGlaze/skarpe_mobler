@@ -69,7 +69,7 @@ const products = [
     year: 2025,
     description: "Lite bord i 4 mm rustfritt stål, med tre buede ben og en skulpturell, balansert form. Utsparingene i bena følger geometrien i bordplaten og gir møbelet et helhetlig uttrykk. Bordet kan skrus fra hverandre og fraktes flatpakket.",
     price: null,
-    slides: ["5.jpg","2.jpg"]
+    slides: ["2.jpg"]
   },
   {
     id: "Bokhylle-V2",
