@@ -4,6 +4,7 @@ const products = [
     number: "01",
     name: "Bokhylle V1",
     year: 2022,
+    coverImage: "4.jpg",
     description: "Kort beskrivelse.",
     price: null
   },
