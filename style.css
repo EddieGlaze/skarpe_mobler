@@ -260,15 +260,29 @@ body.page-home { overflow: hidden; }
   align-items: center;
   justify-content: center;
   cursor: zoom-out;
-  padding: 48px;
 }
 
 #overlay-img {
-  max-width: 90vw;
-  max-height: 90vh;
+  max-width: 80vw;
+  max-height: 85vh;
   object-fit: contain;
-  box-shadow: 0 0 0 1px #e0e0e0;
+  cursor: default;
+  z-index: 2;
+  position: relative;
 }
+
+#overlay-left,
+#overlay-right {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  z-index: 1;
+  cursor: w-resize;
+}
+
+#overlay-left { left: 0; cursor: w-resize; }
+#overlay-right { right: 0; cursor: e-resize; }
 
 /* --- Responsiv (mobil) --- */
 @media (max-width: 768px) {
