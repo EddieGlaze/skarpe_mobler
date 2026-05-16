@@ -17,7 +17,13 @@ document.addEventListener('DOMContentLoaded', function() {
   let imagesHTML = '';
   for (var i = 0; i <= 20; i++) {
     const src = 'images/' + product.id + '/' + i + '.jpg';
-    imagesHTML += '<a href="' + src + '" target="_blank">' +
+    const fullPage = 'data:text/html,' + encodeURIComponent(
+      '<!DOCTYPE html><html><head><style>' +
+      'body{margin:0;background:#fff;display:flex;align-items:center;justify-content:center;min-height:100vh;}' +
+      'img{max-width:90vw;max-height:90vh;box-shadow:0 0 0 1px #e0e0e0;padding:24px;background:#fff;}' +
+      '</style></head><body><img src="' + window.location.origin + '/' + src + '"></body></html>'
+    );
+    imagesHTML += '<a href="' + fullPage + '" target="_blank">' +
       '<img src="' + src + '" alt="' + product.name + '" ' +
       'onerror="this.parentElement.style.display=\'none\'">' +
       '</a>';
