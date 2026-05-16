@@ -136,7 +136,7 @@ body.page-home { overflow: hidden; }
   left: 0;
   width: 260px;
   height: calc(100vh - 60px);
-  padding: 48px;
+  padding: 72px;
   display: flex;
   flex-direction: column;
   gap: 16px;
