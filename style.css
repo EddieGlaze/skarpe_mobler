@@ -62,7 +62,7 @@ body.page-home { overflow: hidden; }
   position: absolute;
   inset: 0;
   opacity: 0;
-  transition: opacity 1.4s ease;
+  transition: opacity 2.5s ease;
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
@@ -262,13 +262,17 @@ body.page-home { overflow: hidden; }
   cursor: zoom-out;
 }
 
+#overlay-img-wrapper {
+  position: relative;
+  z-index: 2;
+  cursor: default;
+}
+
 #overlay-img {
   max-width: 80vw;
   max-height: 85vh;
   object-fit: contain;
-  cursor: default;
-  z-index: 2;
-  position: relative;
+  display: block;
 }
 
 #overlay-left,
@@ -277,8 +281,8 @@ body.page-home { overflow: hidden; }
   top: 0;
   bottom: 0;
   width: 50%;
-  z-index: 1;
-  cursor: w-resize;
+  z-index: 3;
+  opacity: 0;
 }
 
 #overlay-left { left: 0; cursor: w-resize; }
