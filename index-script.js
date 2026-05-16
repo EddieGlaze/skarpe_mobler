@@ -41,41 +41,27 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   var ordered = shuffleNoAdjacentDuplicates(allSlides);
-  var current = 0;
-  var currentSlide = null;
 
-  function showNext() {
-    var item = ordered[current];
+  // Lag alle slides først
+  ordered.forEach(function(item, index) {
+    var slide = document.createElement('div');
+    slide.className = index === 0 ? 'slide active' : 'slide';
+    slide.style.backgroundImage = 'url(' + item.src + ')';
+    slideshow.appendChild(slide);
+  });
+
+  // Forhåndslast alle bilder stille i bakgrunnen
+  ordered.forEach(function(item) {
     var img = new Image();
-
-    img.onload = function() {
-      // Bildet er lastet — fade ut gammelt
-      if (currentSlide) {
-        currentSlide.style.opacity = '0';
-        setTimeout(function() {
-          if (currentSlide) currentSlide.remove();
-        }, 1400);
-      }
-
-      // Lag nytt slide og fade inn
-      var slide = document.createElement('div');
-      slide.className = 'slide';
-      slide.style.backgroundImage = 'url(' + item.src + ')';
-      slideshow.appendChild(slide);
-
-      // Liten forsinkelse for å trigge CSS-transition
-      setTimeout(function() {
-        slide.classList.add('active');
-      }, 20);
-
-      currentSlide = slide;
-      current = (current + 1) % ordered.length;
-    };
-
     img.src = item.src;
-  }
+  });
 
-  // Start
-  showNext();
-  setInterval(showNext, 5000);
+  // Bytt slide hvert 5. sekund
+  var slides = document.querySelectorAll('.slide');
+  var current = 0;
+  setInterval(function() {
+    slides[current].classList.remove('active');
+    current = (current + 1) % slides.length;
+    slides[current].classList.add('active');
+  }, 5000);
 });
