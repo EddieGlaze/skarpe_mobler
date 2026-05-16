@@ -17,16 +17,9 @@ document.addEventListener('DOMContentLoaded', function() {
   let imagesHTML = '';
   for (var i = 0; i <= 20; i++) {
     const src = 'images/' + product.id + '/' + i + '.jpg';
-    const fullPage = 'data:text/html,' + encodeURIComponent(
-      '<!DOCTYPE html><html><head><style>' +
-      'body{margin:0;background:#fff;display:flex;align-items:center;justify-content:center;min-height:100vh;}' +
-      'img{max-width:90vw;max-height:90vh;box-shadow:0 0 0 1px #e0e0e0;padding:24px;background:#fff;}' +
-      '</style></head><body><img src="' + window.location.origin + '/' + src + '"></body></html>'
-    );
-    imagesHTML += '<a href="' + fullPage + '" target="_blank">' +
-      '<img src="' + src + '" alt="' + product.name + '" ' +
-      'onerror="this.parentElement.style.display=\'none\'">' +
-      '</a>';
+    imagesHTML += '<img src="' + src + '" alt="' + product.name + '" ' +
+      'class="product-thumb" data-src="' + src + '" ' +
+      'onerror="this.style.display=\'none\'">';
   }
 
   page.innerHTML =
@@ -37,5 +30,16 @@ document.addEventListener('DOMContentLoaded', function() {
       priceHTML +
       '<button class="btn-inquiry" onclick="window.location.href=\'contact.html?inquiry=' + product.id + '\'">Forespørsel</button>' +
     '</div>' +
-    '<div class="product-images">' + imagesHTML + '</div>';
+    '<div class="product-images">' + imagesHTML + '</div>' +
+    '<div id="overlay" onclick="this.style.display=\'none\'">' +
+      '<img id="overlay-img" src="">' +
+    '</div>';
+
+  // Klikk på bilde åpner overlay
+  document.querySelectorAll('.product-thumb').forEach(function(img) {
+    img.addEventListener('click', function() {
+      document.getElementById('overlay-img').src = this.dataset.src;
+      document.getElementById('overlay').style.display = 'flex';
+    });
+  });
 });
