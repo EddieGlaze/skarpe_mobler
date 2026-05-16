@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact — Studio Glazebrook</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <nav id="nav">
+    <a href="index.html" class="nav-logo">Studio Glazebrook</a>
+    <ul class="nav-links">
+      <li><a href="works.html">Works</a></li>
+      <li><a href="about.html">Studio</a></li>
+      <li><a href="contact.html" class="active">Contact</a></li>
+    </ul>
+  </nav>
+
+  <div class="text-page">
+    <h1>Contact</h1>
+    <p>
+      Studio Glazebrook<br>
+      Oslo, Norway<br>
+      <a href="mailto:din@epost.no">din@epost.no</a>
+    </p>
+
+    <form class="contact-form" id="contact-form">
+      <div class="form-field">
+        <label>Name</label>
+        <input type="text" name="name" required>
+      </div>
+      <div class="form-field">
+        <label>Email</label>
+        <input type="email" name="email" required>
+      </div>
+      <div class="form-field">
+        <label>Message</label>
+        <textarea name="message" required></textarea>
+      </div>
+      <button type="submit" class="btn-inquiry">Send</button>
+    </form>
+  </div>
+
+  <script>
+    // Enkel bekreftelsemelding ved innsending (skjemaet sender ikke epost ennå — det setter vi opp senere)
+    document.getElementById('contact-form').addEventListener('submit', e => {
+      e.preventDefault();
+      e.target.innerHTML = '<p style="padding:20px 0; letter-spacing:0.1em">Message received. We\'ll be in touch.</p>';
+    });
+  </script>
+
+</body>
+</html>

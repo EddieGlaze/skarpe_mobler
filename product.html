@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Studio Glazebrook</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <nav id="nav">
+    <a href="index.html" class="nav-logo">Studio Glazebrook</a>
+    <ul class="nav-links">
+      <li><a href="works.html">Works</a></li>
+      <li><a href="about.html">Studio</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+  </nav>
+
+  <div class="product-page" id="product-page"></div>
+
+  <script src="data.js"></script>
+  <script>
+    const id = new URLSearchParams(window.location.search).get('id');
+    const product = products.find(p => p.id === id);
+    const page = document.getElementById('product-page');
+
+    if (!product) {
+      page.innerHTML = '<p style="padding:120px 48px">Produkt ikke funnet.</p>';
+    } else {
+      document.title = `${product.name} — Studio Glazebrook`;
+
+      const priceHTML = product.price
+        ? `<div class="product-price">NOK ${product.price.toLocaleString('no-NO')}</div>`
+        : '';
+
+      const imagesHTML = product.images
+        .map(src => `<img src="${src}" alt="${product.name}" onerror="this.style.display='none'">`)
+        .join('');
+
+      page.innerHTML = `
+        <div class="product-header">
+          <div>
+            <div class="product-title">${product.name}</div>
+            <div class="product-meta">${product.year}</div>
+          </div>
+          <div class="product-description">
+            <p>${product.description}</p>
+            ${priceHTML}
+            <button class="btn-inquiry" onclick="window.location.href='contact.html?inquiry=${product.id}'">
+              Inquiry
+            </button>
+          </div>
+        </div>
+        <div class="product-gallery">${imagesHTML}</div>
+      `;
+    }
+  </script>
+
+</body>
+</html>

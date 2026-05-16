@@ -1,13 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Studio Glazebrook</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="./src/main.jsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Studio Glazebrook</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="page-home">
+
+  <nav id="nav">
+    <a href="index.html" class="nav-logo">Studio Glazebrook</a>
+    <ul class="nav-links">
+      <li><a href="works.html">Works</a></li>
+      <li><a href="about.html">Studio</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+  </nav>
+
+  <div id="slideshow">
+    <!-- Placeholder-slides med nøytrale farger til du har bilder. -->
+    <!-- Når du har bilder: bytt style="background-color:..." med style="background-image: url('images/forsidebilder/1.jpg')" -->
+    <div class="slide active" style="background-color: #d2cdc6;"></div>
+    <div class="slide"        style="background-color: #c4bfb8;"></div>
+    <div class="slide"        style="background-color: #dbd7d1;"></div>
+  </div>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    let i = 0;
+    setInterval(() => {
+      slides[i].classList.remove('active');
+      i = (i + 1) % slides.length;
+      slides[i].classList.add('active');
+    }, 5000); // bytter slide hvert 5. sekund
+  </script>
+
+</body>
 </html>
