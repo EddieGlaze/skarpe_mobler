@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Works — Studio Glazebrook</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <nav id="nav">
+    <a href="index.html" class="nav-logo">Studio Glazebrook</a>
+    <ul class="nav-links">
+      <li><a href="works.html">Works</a></li>
+      <li><a href="about.html">Studio</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-content">
+    <div class="page-title">Works</div>
+    <div class="works-grid" id="works-grid"></div>
+  </div>
+
+  <script src="data.js"></script>
+  <script>
+    const grid = document.getElementById('works-grid');
+
+    products.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'work-card';
+      card.onclick = () => window.location.href = `product.html?id=${p.id}`;
+
+      card.innerHTML = `
+        <div class="work-card-image">
+          <img src="${p.coverImage}" alt="${p.name}"
+               onerror="this.style.display='none'">
+        </div>
+        <div class="work-card-info">
+          <div class="work-card-name">${p.name}</div>
+          <div class="work-card-year">${p.year}</div>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  </script>
+
+</body>
+</html>
