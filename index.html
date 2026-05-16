@@ -13,29 +13,21 @@
   <nav id="nav">
     <a href="index.html" class="nav-logo">Studio Glazebrook</a>
     <ul class="nav-links">
-      <li><a href="works.html">Works</a></li>
+      <li><a href="works.html">Kolleksjon</a></li>
       <li><a href="about.html">Studio</a></li>
-      <li><a href="contact.html">Contact</a></li>
+      <li><a href="contact.html">Kontakt</a></li>
     </ul>
   </nav>
 
-  <div id="slideshow">
-    <!-- Placeholder-slides med nøytrale farger til du har bilder. -->
-    <!-- Når du har bilder: bytt style="background-color:..." med style="background-image: url('images/forsidebilder/1.jpg')" -->
-    <div class="slide active" style="background-color: #d2cdc6;"></div>
-    <div class="slide"        style="background-color: #c4bfb8;"></div>
-    <div class="slide"        style="background-color: #dbd7d1;"></div>
-  </div>
+  <div id="slideshow"></div>
 
+  <script src="data.js"></script>
   <script>
-    const slides = document.querySelectorAll('.slide');
-    let i = 0;
-    setInterval(() => {
-      slides[i].classList.remove('active');
-      i = (i + 1) % slides.length;
-      slides[i].classList.add('active');
-    }, 5000); // bytter slide hvert 5. sekund
-  </script>
+    const slideshow = document.getElementById('slideshow');
 
-</body>
-</html>
+    // Bland rekkefølgen tilfeldig
+    const shuffled = [...products].sort(() => Math.random() - 0.5);
+
+    // Lag én slide per produkt med cover-bilde
+    shuffled.forEach((p, index) => {
+      const cover = p.coverImage
