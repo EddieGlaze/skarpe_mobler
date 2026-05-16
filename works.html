@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Works — Studio Glazebrook</title>
+  <title>Kolleksjon — Studio Glazebrook</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
@@ -13,14 +13,14 @@
   <nav id="nav">
     <a href="index.html" class="nav-logo">Studio Glazebrook</a>
     <ul class="nav-links">
-      <li><a href="works.html">Works</a></li>
+      <li><a href="works.html">Kolleksjon</a></li>
       <li><a href="about.html">Studio</a></li>
-      <li><a href="contact.html">Contact</a></li>
+      <li><a href="contact.html">Kontakt</a></li>
     </ul>
   </nav>
 
   <div class="page-content">
-    <div class="page-title">Works</div>
+    <div class="page-title">Kolleksjon</div>
     <div class="works-grid" id="works-grid"></div>
   </div>
 
@@ -33,13 +33,18 @@
       card.className = 'work-card';
       card.onclick = () => window.location.href = `product.html?id=${p.id}`;
 
+      // Bruk coverImage hvis satt, ellers 0.jpg
+      const cover = p.coverImage
+        ? `images/${p.id}/${p.coverImage}`
+        : `images/${p.id}/0.jpg`;
+
       card.innerHTML = `
         <div class="work-card-image">
-          <img src="${p.coverImage}" alt="${p.name}"
-               onerror="this.style.display='none'">
+          <img src="${cover}" alt="${p.name}"
+               onerror="this.parentElement.style.background='#e8e4e0'">
         </div>
         <div class="work-card-info">
-          <div class="work-card-name">${p.name}</div>
+          <div class="work-card-name">${p.number} ${p.name}</div>
           <div class="work-card-year">${p.year}</div>
         </div>
       `;
