@@ -2,38 +2,51 @@ document.addEventListener('DOMContentLoaded', function() {
   const slideshow = document.getElementById('slideshow');
   if (!slideshow) return;
 
-  // Bygg liste over alle slides fra products
   const allSlides = [];
   products.forEach(function(p) {
     const slideImages = p.slides || ["0.jpg"];
     slideImages.forEach(function(img) {
-      allSlides.push('images/' + p.id + '/' + img);
+      allSlides.push({
+        id: p.id,
+        src: 'images/' + p.id + '/' + img
+      });
     });
   });
 
-  // Enkel shuffle
-  for (var i = allSlides.length - 1; i > 0; i--) {
-    var j = Math.floor(Math.random() * (i + 1));
-    var tmp = allSlides[i]; allSlides[i] = allSlides[j]; allSlides[j] = tmp;
+  function shuffleNoAdjacent(arr) {
+    // Bland tilfeldig
+    for (var i = arr.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+    }
+    // Én gjennomgang — flytt naboer
+    for (var i = 0; i < arr.length - 1; i++) {
+      if (arr[i].id === arr[i + 1].id) {
+        var target = (i + 2) % arr.length;
+        var moved = arr.splice(i + 1, 1)[0];
+        arr.splice(target, 0, moved);
+      }
+    }
+    return arr;
   }
 
-  // Forhåndslast og lag slides
-  allSlides.forEach(function(src, index) {
+  var ordered = shuffleNoAdjacent(allSlides);
+
+  ordered.forEach(function(item, index) {
     var img = new Image();
-    img.src = src;
+    img.src = item.src;
 
     var slide = document.createElement('div');
     slide.className = index === 0 ? 'slide active' : 'slide';
-    slide.style.backgroundImage = 'url(' + src + ')';
+    slide.style.backgroundImage = 'url(' + item.src + ')';
     slideshow.appendChild(slide);
   });
 
-  // Bytt slide hvert 8. sekund
   var slides = document.querySelectorAll('.slide');
   var current = 0;
   setInterval(function() {
     slides[current].classList.remove('active');
     current = (current + 1) % slides.length;
     slides[current].classList.add('active');
-  }, 5000);
+  }, 8000);
 });
