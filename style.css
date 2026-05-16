@@ -167,11 +167,13 @@ body.page-home { overflow: hidden; }
   flex-direction: column;
   gap: 32px;
   align-items: center;
+  justify-content: flex-start;
 }
 
 .product-images a {
   display: block;
-  width: 65%;
+  width: 55%;
+  margin-left: -130px;
 }
 
 .product-images img {
