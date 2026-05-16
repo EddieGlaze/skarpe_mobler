@@ -173,7 +173,7 @@ body.page-home { overflow: hidden; }
   bottom: 0;
   overflow-y: scroll;
   overflow-x: hidden;
-  padding: 48px;
+  padding: 72px;
   display: flex;
   flex-direction: column;
   gap: 32px;
@@ -183,7 +183,7 @@ body.page-home { overflow: hidden; }
 }
 
 .product-images img {
-  width: 35%;
+  width: 40%;
   height: auto;
   display: block;
   cursor: zoom-in;
