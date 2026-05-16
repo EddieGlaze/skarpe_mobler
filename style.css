@@ -230,6 +230,52 @@ body.page-home { overflow: hidden; }
 .form-field textarea:focus { border-color: #111; }
 .form-field textarea { height: 100px; resize: none; }
 
+/* --- Produktside: fast venstre, scrollbar høyre --- */
+.product-layout {
+  display: flex;
+  height: calc(100vh - 60px);
+  margin-top: 60px;
+}
+
+.product-sidebar {
+  position: sticky;
+  top: 60px;
+  width: 320px;
+  flex-shrink: 0;
+  padding: 48px;
+  height: calc(100vh - 60px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.product-images {
+  flex: 1;
+  overflow-y: scroll;
+  padding: 48px 48px 48px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.product-images a {
+  display: block;
+}
+
+.product-images img {
+  width: 100%;
+  height: auto;
+  display: block;
+  cursor: zoom-in;
+  transition: opacity 0.2s;
+}
+
+.product-images img:hover {
+  opacity: 0.85;
+}
+
+
 /* --- Responsiv (mobil) --- */
 @media (max-width: 768px) {
   #nav { padding: 16px 24px; }
