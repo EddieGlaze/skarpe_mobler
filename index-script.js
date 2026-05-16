@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const slideshow = document.getElementById('slideshow');
   if (!slideshow) return;
 
-  // Bygg liste over alle slides med prosjekt-id
   const allSlides = [];
   products.forEach(function(p) {
     const slideImages = p.slides || ["0.jpg"];
@@ -14,7 +13,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // Bland tilfeldig, men ingen to fra samme prosjekt på rad
   function shuffle(arr) {
     for (var i = arr.length - 1; i > 0; i--) {
       var j = Math.floor(Math.random() * (i + 1));
@@ -43,21 +41,41 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   var ordered = shuffleNoAdjacentDuplicates(allSlides);
-
-  // Lag slides
-  ordered.forEach(function(item, index) {
-    var slide = document.createElement('div');
-    slide.className = index === 0 ? 'slide active' : 'slide';
-    slide.style.backgroundImage = 'url(' + item.src + ')';
-    slideshow.appendChild(slide);
-  });
-
-  // Bytt slide hvert 5. sekund
-  var slides = document.querySelectorAll('.slide');
   var current = 0;
-  setInterval(function() {
-    slides[current].classList.remove('active');
-    current = (current + 1) % slides.length;
-    slides[current].classList.add('active');
-  }, 5000);
+  var currentSlide = null;
+
+  function showNext() {
+    var item = ordered[current];
+    var img = new Image();
+
+    img.onload = function() {
+      // Bildet er lastet — fade ut gammelt
+      if (currentSlide) {
+        currentSlide.style.opacity = '0';
+        setTimeout(function() {
+          if (currentSlide) currentSlide.remove();
+        }, 1400);
+      }
+
+      // Lag nytt slide og fade inn
+      var slide = document.createElement('div');
+      slide.className = 'slide';
+      slide.style.backgroundImage = 'url(' + item.src + ')';
+      slideshow.appendChild(slide);
+
+      // Liten forsinkelse for å trigge CSS-transition
+      setTimeout(function() {
+        slide.classList.add('active');
+      }, 20);
+
+      currentSlide = slide;
+      current = (current + 1) % ordered.length;
+    };
+
+    img.src = item.src;
+  }
+
+  // Start
+  showNext();
+  setInterval(showNext, 5000);
 });
