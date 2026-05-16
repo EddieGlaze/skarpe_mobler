@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; img-src 'self' data:;">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Studio Glazebrook</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -23,12 +22,7 @@
   <div id="slideshow"></div>
 
   <script src="data.js"></script>
-  <script>
-    const slideshow = document.getElementById('slideshow');
+  <script src="index-script.js"></script>
 
-    // Bland rekkefølgen tilfeldig
-    const shuffled = [...products].sort(() => Math.random() - 0.5);
-
-    // Lag én slide per produkt med cover-bilde
-    shuffled.forEach((p, index) => {
-      const cover = p.coverImage
+</body>
+</html>
