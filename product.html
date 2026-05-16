@@ -22,34 +22,7 @@
   <div class="product-layout" id="product-page"></div>
 
   <script src="data.js"></script>
-  <script>
-    const id = new URLSearchParams(window.location.search).get('id');
-    const product = products.find(p => p.id === id);
-    const page = document.getElementById('product-page');
+  <script src="product-script.js"></script>
 
-    if (!product) {
-      page.innerHTML = '<p style="padding:120px 48px">Produkt ikke funnet.</p>';
-    } else {
-      document.title = `${product.name} — Studio Glazebrook`;
-
-      const priceHTML = product.price
-        ? `<div class="product-price">NOK ${product.price.toLocaleString('no-NO')}</div>`
-        : '';
-
-      // Lag bildekort — klikk åpner fullt bilde i ny fane
-      let imagesHTML = '';
-      for (let i = 0; i <= 20; i++) {
-        const src = `images/${product.id}/${i}.jpg`;
-        imagesHTML += `
-          <a href="${src}" target="_blank">
-            <img src="${src}" alt="${product.name} — bilde ${i}"
-              onerror="this.parentElement.style.display='none'">
-          </a>`;
-      }
-
-      page.innerHTML = `
-        <div class="product-sidebar">
-          <div class="product-title">${product.number} ${product.name}</div>
-          <div class="product-meta">${product.year}</div>
-          <div class="product-description">
-            <p>${product.description}</p>
+</body>
+</html>
