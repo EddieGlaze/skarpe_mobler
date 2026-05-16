@@ -250,6 +250,27 @@ body.page-home { overflow: hidden; }
 .form-field textarea:focus { border-color: #111; }
 .form-field textarea { height: 100px; resize: none; }
 
+/* --- Lightbox overlay --- */
+#overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(255,255,255,0.96);
+  z-index: 500;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-out;
+  padding: 48px;
+}
+
+#overlay-img {
+  max-width: 90vw;
+  max-height: 90vh;
+  object-fit: contain;
+  box-shadow: 0 0 0 1px #e0e0e0;
+}
+
+
 /* --- Responsiv (mobil) --- */
 @media (max-width: 768px) {
   #nav { padding: 16px 24px; }
