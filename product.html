@@ -13,9 +13,9 @@
   <nav id="nav">
     <a href="index.html" class="nav-logo">Studio Glazebrook</a>
     <ul class="nav-links">
-      <li><a href="works.html">Works</a></li>
+      <li><a href="works.html">Kolleksjon</a></li>
       <li><a href="about.html">Studio</a></li>
-      <li><a href="contact.html">Contact</a></li>
+      <li><a href="contact.html">Kontakt</a></li>
     </ul>
   </nav>
 
@@ -36,21 +36,28 @@
         ? `<div class="product-price">NOK ${product.price.toLocaleString('no-NO')}</div>`
         : '';
 
-      const imagesHTML = product.images
-        .map(src => `<img src="${src}" alt="${product.name}" onerror="this.style.display='none'">`)
-        .join('');
+      // Last bilder 0.jpg til 20.jpg, vis kun de som finnes
+      const basePath = `images/${product.id}/`;
+      let imagesHTML = '';
+      for (let i = 0; i <= 20; i++) {
+        const src = `${basePath}${i}.jpg`;
+        imagesHTML += `<img src="${src}" alt="${product.name}"
+          onerror="this.style.display='none'"
+          style="height:420px; width:auto; object-fit:cover; flex-shrink:0;">`;
+      }
 
       page.innerHTML = `
         <div class="product-header">
           <div>
-            <div class="product-title">${product.name}</div>
+            <div class="product-title">${product.number} ${product.name}</div>
             <div class="product-meta">${product.year}</div>
           </div>
           <div class="product-description">
             <p>${product.description}</p>
             ${priceHTML}
-            <button class="btn-inquiry" onclick="window.location.href='contact.html?inquiry=${product.id}'">
-              Inquiry
+            <button class="btn-inquiry"
+              onclick="window.location.href='contact.html?inquiry=${product.id}'">
+              Forespørsel
             </button>
           </div>
         </div>
