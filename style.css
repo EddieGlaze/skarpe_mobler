@@ -176,7 +176,7 @@ body.page-home { overflow: hidden; }
 }
 
 .product-images img {
-  width: 50%;
+  width: 35%;
   height: auto;
   display: block;
   cursor: zoom-in;
