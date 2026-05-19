@@ -156,6 +156,8 @@ body.page-home { overflow: hidden; }
   font-size: 12px;
   font-weight: 400;
   letter-spacing: 0.06em;
+  display: flex;
+  align-items: center;
 }
 .work-card-year {
   font-size: 11px;
@@ -189,6 +191,8 @@ body.page-home { overflow: hidden; }
   font-size: 14px;
   font-weight: 400;
   letter-spacing: 0.08em;
+  display: flex;
+  align-items: center;
 }
 .product-meta {
   font-size: 11px;
@@ -232,43 +236,30 @@ body.page-home { overflow: hidden; }
 }
 .product-images img:hover { opacity: 0.85; }
 
-/* --- Prosjektnavigasjon inline --- */
+/* --- Prosjektnavigasjon --- */
 .product-nav-prev,
 .product-nav-next {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  opacity: 0.3;
-  transition: opacity 0.2s;
-  flex-shrink: 0;
-}
-.product-nav-prev:hover,
-.product-nav-next:hover { opacity: 0.9; }
-.product-nav-prev svg,
-.product-nav-next svg {
-  width: 6px;
-  height: 6px;
-}
-
-/* --- Overlay-prosjektpiler --- */
-.overlay-project-prev,
-.overlay-project-next {
   position: fixed;
-  z-index: 600;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 150;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  opacity: 0.3;
+  opacity: 0.2;
   transition: opacity 0.2s;
 }
-.overlay-project-prev:hover,
-.overlay-project-next:hover { opacity: 0.9; }
-.overlay-project-prev svg,
-.overlay-project-next svg {
-  width: 6px;
-  height: 6px;
+.product-nav-prev { left: 16px; }
+.product-nav-next { left: 284px; }
+.product-nav-prev:hover,
+.product-nav-next:hover { opacity: 0.7; }
+.product-nav-prev svg,
+.product-nav-next svg {
+  width: 8px;
+  height: 8px;
 }
 
 /* Forespørsel-knapp */
@@ -378,7 +369,7 @@ body.page-home { overflow: hidden; }
   border-radius: 50%;
   border: 1px solid #111;
   vertical-align: middle;
-  margin-right: 8px;
+  margin-left: 8px;
   flex-shrink: 0;
 }
 .dot-full  { background: #111; }
@@ -442,6 +433,6 @@ body.page-home { overflow: hidden; }
     max-width: calc(100vw - 16px);
     max-height: calc(100vh - 16px);
   }
-  .overlay-project-prev,
-  .overlay-project-next { display: none; }
+  .product-nav-prev,
+  .product-nav-next { display: none; }
 }
