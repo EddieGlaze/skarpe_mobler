@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   page.innerHTML =
     '<div class="product-sidebar">' +
-      '<div class="product-title">' + product.number + ' ' + product.name + '</div>' +
+      '<div class="product-title"><span class="dot-' + (product.status || 'empty') + '"></span>' + product.number + ' ' + product.name + '</div>' +
       '<div class="product-meta">' + product.year + '</div>' +
       '<div class="product-description"><p>' + product.description + '</p></div>' +
       priceHTML +
