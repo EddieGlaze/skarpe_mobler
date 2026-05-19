@@ -10,44 +10,24 @@
 </head>
 <body>
 
-  <nav id="nav">
-    <a href="index.html" class="nav-logo">Studio Glazebrook</a>
-    <ul class="nav-links">
-      <li><a href="works.html">Kolleksjon</a></li>
-      <li><a href="about.html">Studio</a></li>
-      <li><a href="contact.html">Kontakt</a></li>
-    </ul>
-    <button class="nav-hamburger" id="hamburger" aria-label="Meny">
-      <span></span><span></span><span></span>
-    </button>
-  </nav>
-
-  <div class="nav-mobile-menu" id="mobile-menu">
-    <a href="index.html">Hjem</a>
-    <a href="works.html">Kolleksjon</a>
-    <a href="about.html">Studio</a>
-    <a href="contact.html">Kontakt</a>
-  </div>
+  <nav id="nav"></nav>
+  <div class="nav-mobile-menu" id="mobile-menu"></div>
 
   <div class="text-page">
     <h1>Studio</h1>
-    <p>Edvard Glazebrook er norsk designer og arkitekt med bakgrunn fra Arkitektur- og designhøgskolen i Oslo. Han kombinerer teknisk presisjon med et enkelt, industrielt formspråk — og har over tid utviklet en metodisk tilnærming til møbelproduksjon hvor CNC-bearbeidede platematerialer settes sammen til presise, skulpturelle former.</p>
-    <p>Gjennom bruk av aluminium, stål, tre og lær lager han møbler som balanserer det tekniske mot det taktile. Delene bestilles ferdig kuttet med tilpassede sammenføyninger, slik at møblene kan monteres uten sveising eller etterbearbeiding. Konstruksjon som uttrykk, presisjon som ornament.</p>
-    <p>Studio Glazebrook holder til i Oslo.</p>
+    <p>Studio Glazebrook er et lite møbelstudio drevet av meg, Edvard Glazebrook. Møblene designes og produseres lokalt i maskinkuttede materialer, stål, aluminium, skinn og limtre. Stålmøblene settes sammen med egenutviklede sammenføyninger uten sveising eller bøying, som er en integrert del av uttrykket. Metoden springer ut av et langvarig arbeid med laserkutting og CNC-fresing.</p>
+    <p>Enkelte møbler kan bestilles direkte, andre er prototyper. Tilpasninger er mulig mot tillegg.</p>
+
+    <ul class="status-list">
+      <li><span class="dot-full"></span> Prototype, kan reproduseres på forespørsel</li>
+      <li><span class="dot-half"></span> Kan produseres direkte</li>
+      <li><span class="dot-empty"></span> På lager</li>
+    </ul>
+
+    <p style="margin-top: 32px;">Ta kontakt for bestilling eller spørsmål.</p>
   </div>
 
-  <script>
-    document.getElementById('hamburger').addEventListener('click', function() {
-      this.classList.toggle('open');
-      document.getElementById('mobile-menu').classList.toggle('open');
-    });
-    document.querySelectorAll('#mobile-menu a').forEach(function(a) {
-      a.addEventListener('click', function() {
-        document.getElementById('hamburger').classList.remove('open');
-        document.getElementById('mobile-menu').classList.remove('open');
-      });
-    });
-  </script>
+  <script src="nav.js"></script>
 
 </body>
 </html>
