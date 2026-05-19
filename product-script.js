@@ -30,16 +30,14 @@ document.addEventListener('DOMContentLoaded', function() {
   var prevIndex = (currentIndex - 1 + products.length) % products.length;
   var nextIndex = (currentIndex + 1) % products.length;
 
-  var prevSvg = '<svg viewBox="0 0 6 6" fill="#111"><polygon points="6,0 6,6 0,3"/></svg>';
-  var nextSvg = '<svg viewBox="0 0 6 6" fill="#111"><polygon points="0,0 0,6 6,3"/></svg>';
+  var prevSvg = '<svg viewBox="0 0 8 8" fill="#111"><polygon points="8,0 8,8 0,4"/></svg>';
+  var nextSvg = '<svg viewBox="0 0 8 8" fill="#111"><polygon points="0,0 0,8 8,4"/></svg>';
 
   page.innerHTML =
     '<div class="product-sidebar">' +
-      '<div class="product-title" style="display:flex;align-items:center;gap:6px;">' +
-        '<span class="product-nav-prev" id="proj-prev">' + prevSvg + '</span>' +
-        '<span class="dot-' + (product.status || 'empty') + '"></span>' +
+      '<div class="product-title">' +
         product.number + ' ' + product.name +
-        '<span class="product-nav-next" id="proj-next">' + nextSvg + '</span>' +
+        '<span class="dot-' + (product.status || 'empty') + '"></span>' +
       '</div>' +
       '<div class="product-meta">' + product.year + '</div>' +
       '<div class="product-description"><p>' + product.description + '</p></div>' +
@@ -55,32 +53,18 @@ document.addEventListener('DOMContentLoaded', function() {
       '</div>' +
     '</div>';
 
-  // Prosjektnavigasjon inline
-  document.getElementById('proj-prev').onclick = function() {
-    window.location.href = 'product.html?id=' + products[prevIndex].id;
-  };
-  document.getElementById('proj-next').onclick = function() {
-    window.location.href = 'product.html?id=' + products[nextIndex].id;
-  };
+  // Faste piler i margene på hver side av sidefeltet
+  var prevBtn = document.createElement('div');
+  prevBtn.className = 'product-nav-prev';
+  prevBtn.innerHTML = prevSvg;
+  prevBtn.onclick = function() { window.location.href = 'product.html?id=' + products[prevIndex].id; };
+  document.body.appendChild(prevBtn);
 
-  // Overlay-piler
-  var overlayPrevBtn = document.createElement('div');
-  overlayPrevBtn.className = 'overlay-project-prev';
-  overlayPrevBtn.innerHTML = prevSvg;
-  overlayPrevBtn.onclick = function(e) {
-    e.stopPropagation();
-    window.location.href = 'product.html?id=' + products[prevIndex].id;
-  };
-  document.body.appendChild(overlayPrevBtn);
-
-  var overlayNextBtn = document.createElement('div');
-  overlayNextBtn.className = 'overlay-project-next';
-  overlayNextBtn.innerHTML = nextSvg;
-  overlayNextBtn.onclick = function(e) {
-    e.stopPropagation();
-    window.location.href = 'product.html?id=' + products[nextIndex].id;
-  };
-  document.body.appendChild(overlayNextBtn);
+  var nextBtn = document.createElement('div');
+  nextBtn.className = 'product-nav-next';
+  nextBtn.innerHTML = nextSvg;
+  nextBtn.onclick = function() { window.location.href = 'product.html?id=' + products[nextIndex].id; };
+  document.body.appendChild(nextBtn);
 
   // Bildenavigasjon
   function getVisibleImages() {
@@ -91,27 +75,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
   var overlayIndex = 0;
 
-  function positionOverlayBtns() {
-    var imgEl = document.getElementById('overlay-img');
-    var rect = imgEl.getBoundingClientRect();
-    var midY = (rect.top + rect.height / 2) + 'px';
-    overlayPrevBtn.style.left = Math.max(8, rect.left - 28) + 'px';
-    overlayPrevBtn.style.top = midY;
-    overlayPrevBtn.style.transform = 'translateY(-50%)';
-    overlayNextBtn.style.left = (rect.right + 8) + 'px';
-    overlayNextBtn.style.top = midY;
-    overlayNextBtn.style.transform = 'translateY(-50%)';
-  }
-
   function openOverlay(index) {
     var visible = getVisibleImages();
     if (!visible.length) return;
     overlayIndex = index;
-    var imgEl = document.getElementById('overlay-img');
-    imgEl.src = visible[overlayIndex].src;
+    document.getElementById('overlay-img').src = visible[overlayIndex].src;
     document.getElementById('overlay').style.display = 'flex';
-    imgEl.onload = positionOverlayBtns;
-    setTimeout(positionOverlayBtns, 100);
   }
 
   function closeOverlay() {
@@ -131,9 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   document.querySelectorAll('.product-thumb').forEach(function(img, index) {
-    img.addEventListener('click', function() {
-      openOverlay(index);
-    });
+    img.addEventListener('click', function() { openOverlay(index); });
   });
 
   document.getElementById('overlay-left').addEventListener('click', function(e) {
