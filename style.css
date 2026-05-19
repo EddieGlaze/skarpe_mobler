@@ -204,13 +204,12 @@ body.page-home { overflow: hidden; }
   letter-spacing: 0.06em;
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: space-between;
 }
 .product-year {
   font-size: 11px;
   color: #999;
   letter-spacing: 0.06em;
-  margin-left: 8px;
 }
 .product-nav-gap {
   display: inline-block;
