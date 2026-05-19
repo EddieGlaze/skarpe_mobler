@@ -99,8 +99,9 @@ body.page-home { overflow: hidden; }
 
 #slideshow {
   position: fixed;
-  inset: 48px;
-  top: 60px;
+  left: 48px;
+  right: 120px;
+   top: 60px;
   z-index: 0;
 }
 .slide {
