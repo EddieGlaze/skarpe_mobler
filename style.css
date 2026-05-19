@@ -336,6 +336,36 @@ body.page-home { overflow: hidden; }
 #overlay-left { left: 0; cursor: w-resize; }
 #overlay-right { right: 0; cursor: e-resize; }
 
+/* --- Status-prikker --- */
+.dot-full, .dot-half, .dot-empty {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1px solid #111;
+  vertical-align: middle;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+.dot-full  { background: #111; }
+.dot-half  { background: linear-gradient(to right, #111 50%, transparent 50%); }
+.dot-empty { background: transparent; }
+
+.status-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+.status-list li {
+  display: flex;
+  align-items: center;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: #666;
+}
+
 /* --- Responsiv (mobil) --- */
 @media (max-width: 768px) {
   #nav { padding: 16px; }
