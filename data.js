@@ -6,7 +6,7 @@ const products = [
     year: 2019,
     description: "Stol med understell i vannkuttet og polert aluminium. Konstruksjonen er satt sammen av presise deler, mens ett sammenhengende stykke kjernelær danner sete, rygg og armlener.",
     price: null,
-    status: "full",
+    status: "half",
     slides: ["0.jpg","1.jpg","2.jpg","5.jpg"]
   },
   {
@@ -46,7 +46,7 @@ const products = [
     year: 2025,
     description: "Bokhylle i 3 mm rustfritt stål, satt sammen av laserkuttede deler med presise sammenføyninger. Den blanke overflaten reflekterer lys og gir hyllen et rent og ryddig uttrykk. Hyllen står på justerbare føtter og kan plasseres fritt eller inntil vegg.",
     price: null,
-    status: "half",
+    status: "empty",
     slides: ["1.jpg","4.jpg"]
   },
   {
@@ -55,7 +55,7 @@ const products = [
     name: "Kaffebord",
     year: 2025,
     description: "Kaffebord i 3 mm rustfritt stål, utviklet som fjerde versjon av samme bordserie. Bordet er bygget opp av laserkuttede deler som skrus sammen med presise sammenføyninger. Konstruksjonen gjør bordet sterkt, tydelig og teknisk i uttrykket.",
-    price: null,
+    price: 17000,
     status: "half",
     slides: ["0.jpg","5.jpg","1.jpg","2.jpg"]
   },
@@ -65,8 +65,8 @@ const products = [
     name: "Bord 1",
     year: 2025,
     description: "Lite bord i 4 mm rustfritt stål, laserskåret og skrudd sammen med maskinskruer. Den runde bordplaten og den enkle konstruksjonen gir bordet et kompakt og robust uttrykk.",
-    price: null,
-    status: "half",
+    price: 6500,
+    status: "empty",
     slides: ["3.jpg","6.jpg"]
   },
   {
@@ -76,7 +76,7 @@ const products = [
     year: 2025,
     description: "Lite bord i 4 mm rustfritt stål, med tre buede ben og en skulpturell, balansert form. Utsparingene i bena følger geometrien i bordplaten og gir møbelet et helhetlig uttrykk. Bordet kan skrus fra hverandre og fraktes flatpakket.",
     price: null,
-    status: "empty",
+    status: "half",
     slides: ["5.jpg","2.jpg"]
   },
   {
@@ -86,7 +86,7 @@ const products = [
     year: 2025,
     description: "Videreutvikling av Bokhylle V1 i 3 mm rustfritt stål, med ekstra inndeling i øverste hylle. Hyllen er bygget opp av laserkuttede deler med presise sammenføyninger, og står på justerbare føtter.",
     price: null,
-    status: "empty",
+    status: "half",
     slides: ["0.jpg","4.jpg","3.jpg"]
   }
 ];
