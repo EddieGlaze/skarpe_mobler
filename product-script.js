@@ -30,8 +30,8 @@ document.addEventListener('DOMContentLoaded', function() {
   var prevIndex = (currentIndex - 1 + products.length) % products.length;
   var nextIndex = (currentIndex + 1) % products.length;
 
-  var prevSvg = '<svg viewBox="0 0 8 8" fill="#111"><polygon points="8,0 8,8 0,4"/></svg>';
-  var nextSvg = '<svg viewBox="0 0 8 8" fill="#111"><polygon points="0,0 0,8 8,4"/></svg>';
+  var prevSvg = '<svg viewBox="0 0 8 8" fill="#aaa"><polygon points="8,0 8,8 0,4"/></svg>';
+  var nextSvg = '<svg viewBox="0 0 8 8" fill="#aaa"><polygon points="0,0 0,8 8,4"/></svg>';
 
   page.innerHTML =
     '<div class="product-sidebar">' +
@@ -39,13 +39,24 @@ document.addEventListener('DOMContentLoaded', function() {
         product.number + ' ' + product.name +
         '<span class="dot-' + (product.status || 'empty') + '"></span>' +
       '</div>' +
-      '<div class="product-meta">' + product.year + '</div>' +
+      '<div class="product-meta">' +
+        '<span class="product-nav-prev" id="proj-prev">' + prevSvg + '</span>' +
+        '<span class="product-nav-gap"></span>' +
+        '<span class="product-nav-next" id="proj-next">' + nextSvg + '</span>' +
+        '<span class="product-year">' + product.year + '</span>' +
+      '</div>' +
       '<div class="product-description"><p>' + product.description + '</p></div>' +
       priceHTML +
       '<button class="btn-inquiry" onclick="window.location.href=\'contact.html?inquiry=' + product.id + '\'">Forespørsel</button>' +
     '</div>' +
     '<div class="product-images">' + imagesHTML + '</div>' +
     '<div id="overlay">' +
+      '<div id="overlay-info">' +
+        '<span class="product-nav-prev" id="overlay-prev">' + prevSvg + '</span>' +
+        '<span class="product-nav-gap"></span>' +
+        '<span class="product-nav-next" id="overlay-next">' + nextSvg + '</span>' +
+        '<span style="font-size:11px;letter-spacing:0.1em;color:#999;margin-left:16px;">' + product.number + ' ' + product.name + ' — ' + product.year + '</span>' +
+      '</div>' +
       '<div id="overlay-img-wrapper">' +
         '<img id="overlay-img" src="">' +
         '<div id="overlay-left"></div>' +
@@ -53,20 +64,21 @@ document.addEventListener('DOMContentLoaded', function() {
       '</div>' +
     '</div>';
 
-  // Faste piler i margene på hver side av sidefeltet
-  var prevBtn = document.createElement('div');
-  prevBtn.className = 'product-nav-prev';
-  prevBtn.innerHTML = prevSvg;
-  prevBtn.onclick = function() { window.location.href = 'product.html?id=' + products[prevIndex].id; };
-  document.body.appendChild(prevBtn);
+  document.getElementById('proj-prev').onclick = function() {
+    window.location.href = 'product.html?id=' + products[prevIndex].id;
+  };
+  document.getElementById('proj-next').onclick = function() {
+    window.location.href = 'product.html?id=' + products[nextIndex].id;
+  };
+  document.getElementById('overlay-prev').onclick = function(e) {
+    e.stopPropagation();
+    window.location.href = 'product.html?id=' + products[prevIndex].id;
+  };
+  document.getElementById('overlay-next').onclick = function(e) {
+    e.stopPropagation();
+    window.location.href = 'product.html?id=' + products[nextIndex].id;
+  };
 
-  var nextBtn = document.createElement('div');
-  nextBtn.className = 'product-nav-next';
-  nextBtn.innerHTML = nextSvg;
-  nextBtn.onclick = function() { window.location.href = 'product.html?id=' + products[nextIndex].id; };
-  document.body.appendChild(nextBtn);
-
-  // Bildenavigasjon
   function getVisibleImages() {
     return Array.from(document.querySelectorAll('.product-thumb')).filter(function(img) {
       return img.style.display !== 'none' && img.complete && img.naturalWidth > 0;
@@ -107,17 +119,17 @@ document.addEventListener('DOMContentLoaded', function() {
     e.stopPropagation();
     prevImage();
   });
-
   document.getElementById('overlay-right').addEventListener('click', function(e) {
     e.stopPropagation();
     nextImage();
   });
-
   document.getElementById('overlay').addEventListener('click', function() {
     closeOverlay();
   });
-
   document.getElementById('overlay-img').addEventListener('click', function(e) {
+    e.stopPropagation();
+  });
+  document.getElementById('overlay-info').addEventListener('click', function(e) {
     e.stopPropagation();
   });
 
