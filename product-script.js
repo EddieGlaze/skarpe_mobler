@@ -43,6 +43,36 @@ document.addEventListener('DOMContentLoaded', function() {
       '</div>' +
     '</div>';
 
+  // Prosjektnavigasjon
+  var currentIndex = products.findIndex(function(p) { return p.id === id; });
+  var prevIndex = (currentIndex - 1 + products.length) % products.length;
+  var nextIndex = (currentIndex + 1) % products.length;
+
+  var prevBtn = document.createElement('div');
+  prevBtn.className = 'product-nav-prev';
+  prevBtn.innerHTML = '<svg viewBox="0 0 10 16" fill="none"><polyline points="8,1 2,8 8,15" stroke="#111" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  prevBtn.onclick = function() { window.location.href = 'product.html?id=' + products[prevIndex].id; };
+  document.body.appendChild(prevBtn);
+
+  var nextBtn = document.createElement('div');
+  nextBtn.className = 'product-nav-next';
+  nextBtn.innerHTML = '<svg viewBox="0 0 10 16" fill="none"><polyline points="2,1 8,8 2,15" stroke="#111" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  nextBtn.onclick = function() { window.location.href = 'product.html?id=' + products[nextIndex].id; };
+  document.body.appendChild(nextBtn);
+
+  var overlayPrevBtn = document.createElement('div');
+  overlayPrevBtn.className = 'overlay-project-prev';
+  overlayPrevBtn.innerHTML = '<svg viewBox="0 0 10 16" fill="none"><polyline points="8,1 2,8 8,15" stroke="#111" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  overlayPrevBtn.onclick = function(e) { e.stopPropagation(); window.location.href = 'product.html?id=' + products[prevIndex].id; };
+  document.body.appendChild(overlayPrevBtn);
+
+  var overlayNextBtn = document.createElement('div');
+  overlayNextBtn.className = 'overlay-project-next';
+  overlayNextBtn.innerHTML = '<svg viewBox="0 0 10 16" fill="none"><polyline points="2,1 8,8 2,15" stroke="#111" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  overlayNextBtn.onclick = function(e) { e.stopPropagation(); window.location.href = 'product.html?id=' + products[nextIndex].id; };
+  document.body.appendChild(overlayNextBtn);
+
+  // Bildenavigasjon
   function getVisibleImages() {
     return Array.from(document.querySelectorAll('.product-thumb')).filter(function(img) {
       return img.style.display !== 'none' && img.complete && img.naturalWidth > 0;
@@ -91,12 +121,10 @@ document.addEventListener('DOMContentLoaded', function() {
     nextImage();
   });
 
-  // Klikk på hvitt utenfor bildet lukker
   document.getElementById('overlay').addEventListener('click', function() {
     closeOverlay();
   });
 
-  // Klikk på wrapper stopper ikke — bare bildet stopper
   document.getElementById('overlay-img').addEventListener('click', function(e) {
     e.stopPropagation();
   });
