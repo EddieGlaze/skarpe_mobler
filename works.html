@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="no">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,7 +17,17 @@
       <li><a href="about.html">Studio</a></li>
       <li><a href="contact.html">Kontakt</a></li>
     </ul>
+    <button class="nav-hamburger" id="hamburger" aria-label="Meny">
+      <span></span><span></span><span></span>
+    </button>
   </nav>
+
+  <div class="nav-mobile-menu" id="mobile-menu">
+    <a href="index.html">Hjem</a>
+    <a href="works.html">Kolleksjon</a>
+    <a href="about.html">Studio</a>
+    <a href="contact.html">Kontakt</a>
+  </div>
 
   <div class="page-content">
     <div class="page-title">Kolleksjon</div>
@@ -27,28 +37,34 @@
   <script src="data.js"></script>
   <script>
     const grid = document.getElementById('works-grid');
+    products.forEach(function(p) {
+      const cover = p.coverImage
+        ? 'images/' + p.id + '/' + p.coverImage
+        : 'images/' + p.id + '/0.jpg';
 
-    products.forEach(p => {
       const card = document.createElement('div');
       card.className = 'work-card';
-      card.onclick = () => window.location.href = `product.html?id=${p.id}`;
-
-      // Bruk coverImage hvis satt, ellers 0.jpg
-      const cover = p.coverImage
-        ? `images/${p.id}/${p.coverImage}`
-        : `images/${p.id}/0.jpg`;
-
-      card.innerHTML = `
-        <div class="work-card-image">
-          <img src="${cover}" alt="${p.name}"
-               onerror="this.parentElement.style.background='#e8e4e0'">
-        </div>
-        <div class="work-card-info">
-          <div class="work-card-name">${p.number} ${p.name}</div>
-          <div class="work-card-year">${p.year}</div>
-        </div>
-      `;
+      card.onclick = function() { window.location.href = 'product.html?id=' + p.id; };
+      card.innerHTML =
+        '<div class="work-card-image">' +
+          '<img src="' + cover + '" alt="' + p.name + '" onerror="this.parentElement.style.background=\'#e8e4e0\'">' +
+        '</div>' +
+        '<div class="work-card-info">' +
+          '<div class="work-card-name">' + p.number + ' ' + p.name + '</div>' +
+          '<div class="work-card-year">' + p.year + '</div>' +
+        '</div>';
       grid.appendChild(card);
+    });
+
+    document.getElementById('hamburger').addEventListener('click', function() {
+      this.classList.toggle('open');
+      document.getElementById('mobile-menu').classList.toggle('open');
+    });
+    document.querySelectorAll('#mobile-menu a').forEach(function(a) {
+      a.addEventListener('click', function() {
+        document.getElementById('hamburger').classList.remove('open');
+        document.getElementById('mobile-menu').classList.remove('open');
+      });
     });
   </script>
 
