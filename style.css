@@ -77,7 +77,7 @@ img { display: block; max-width: 100%; }
 .nav-mobile-menu {
   display: none;
   position: fixed;
-  top: 52px;
+  top: 60px;
   left: 0;
   right: 0;
   background: rgba(255,255,255,0.98);
@@ -99,8 +99,8 @@ body.page-home { overflow: hidden; }
 
 #slideshow {
   position: fixed;
-  inset: 16px;
-  top: 52px;
+  inset: 48px;
+  top: 60px;
   z-index: 0;
 }
 .slide {
@@ -230,8 +230,35 @@ body.page-home { overflow: hidden; }
   cursor: zoom-in;
   transition: opacity 0.2s;
 }
-
 .product-images img:hover { opacity: 0.85; }
+
+/* --- Prosjektnavigasjon --- */
+.product-nav-prev,
+.product-nav-next {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 150;
+  width: 32px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0.25;
+  transition: opacity 0.2s;
+}
+.product-nav-prev:hover,
+.product-nav-next:hover { opacity: 0.6; }
+
+.product-nav-prev { left: 320px; }
+.product-nav-next { right: 0; }
+
+.product-nav-prev svg,
+.product-nav-next svg {
+  width: 10px;
+  height: 16px;
+}
 
 /* Forespørsel-knapp */
 .btn-inquiry {
@@ -309,20 +336,17 @@ body.page-home { overflow: hidden; }
   justify-content: center;
   cursor: zoom-out;
 }
-
 #overlay-img-wrapper {
   position: relative;
   z-index: 2;
   cursor: default;
 }
-
 #overlay-img {
   max-width: calc(100vw - 48px);
   max-height: calc(100vh - 48px);
   object-fit: contain;
   display: block;
 }
-
 #overlay-left,
 #overlay-right {
   position: absolute;
@@ -332,9 +356,29 @@ body.page-home { overflow: hidden; }
   z-index: 3;
   opacity: 0;
 }
-
 #overlay-left { left: 0; cursor: w-resize; }
 #overlay-right { right: 0; cursor: e-resize; }
+
+/* Prosjektpiler i overlay */
+.overlay-project-prev,
+.overlay-project-next {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 600;
+  width: 32px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0.25;
+  transition: opacity 0.2s;
+}
+.overlay-project-prev:hover,
+.overlay-project-next:hover { opacity: 0.6; }
+.overlay-project-prev { left: 16px; }
+.overlay-project-next { right: 16px; }
 
 /* --- Status-prikker --- */
 .dot-full, .dot-half, .dot-empty {
@@ -372,10 +416,8 @@ body.page-home { overflow: hidden; }
   .nav-links { display: none; }
   .nav-hamburger { display: flex; }
 
-  #slideshow {
-    inset: 16px;
-    top: 52px;
-  }
+  #slideshow { inset: 16px; top: 52px; }
+  .nav-mobile-menu { top: 52px; }
 
   .page-content { scrollbar-gutter: auto; }
   .page-title { padding: 24px 16px 16px; }
@@ -385,11 +427,7 @@ body.page-home { overflow: hidden; }
     gap: 8px;
   }
   .work-card-info { padding: 10px 0 20px; }
-
-  .text-page {
-    padding-left: 16px;
-    padding-right: 16px;
-  }
+  .text-page { padding-left: 16px; padding-right: 16px; }
   .text-page h1 { margin: 32px 0 24px; }
 
   .product-layout { height: auto; margin-top: 52px; overflow: visible; }
@@ -410,9 +448,10 @@ body.page-home { overflow: hidden; }
     gap: 16px;
   }
   .product-images img { width: 100%; }
-
   #overlay-img {
     max-width: calc(100vw - 16px);
     max-height: calc(100vh - 16px);
   }
+  .product-nav-prev,
+  .product-nav-next { display: none; }
 }
