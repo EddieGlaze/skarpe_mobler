@@ -117,8 +117,6 @@ body.page-home { overflow: hidden; }
 /* --- Works: produktgrid --- */
 .page-content {
   padding-top: 80px;
-  overflow-y: scroll;
-  scrollbar-gutter: stable;
 }
 .page-title {
   padding: 48px 72px 32px;
