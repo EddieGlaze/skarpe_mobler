@@ -200,6 +200,19 @@ body.page-home { overflow: hidden; }
   color: #999;
   margin-top: 4px;
   letter-spacing: 0.06em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.product-year {
+  font-size: 11px;
+  color: #999;
+  letter-spacing: 0.06em;
+  margin-left: 8px;
+}
+.product-nav-gap {
+  display: inline-block;
+  width: 8px;
 }
 .product-description {
   font-size: 13px;
@@ -240,29 +253,31 @@ body.page-home { overflow: hidden; }
 /* --- Prosjektnavigasjon --- */
 .product-nav-prev,
 .product-nav-next {
-  position: fixed;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 150;
-  width: 36px;
-  height: 36px;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  opacity: 0.2;
+  opacity: 0.5;
   transition: opacity 0.2s;
 }
-.product-nav-prev { left: 16px; }
-.product-nav-next { left: 284px; }
 .product-nav-prev:hover,
-.product-nav-next:hover { opacity: 0.7; }
+.product-nav-next:hover { opacity: 1; }
 .product-nav-prev svg,
 .product-nav-next svg {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
 }
-
+#overlay-info {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: default;
+}
 /* Forespørsel-knapp */
 .btn-inquiry {
   display: inline-block;
