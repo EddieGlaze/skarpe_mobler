@@ -101,8 +101,10 @@ body.page-home { overflow: hidden; }
   position: fixed;
   left: 48px;
   right: 120px;
-   top: 60px;
+  top: 60px;
+  bottom: 48px;
   z-index: 0;
+}
 }
 .slide {
   position: absolute;
