@@ -10,31 +10,15 @@
 </head>
 <body>
 
-  <nav id="nav">
-    <a href="index.html" class="nav-logo">Studio Glazebrook</a>
-    <ul class="nav-links">
-      <li><a href="works.html">Kolleksjon</a></li>
-      <li><a href="about.html">Studio</a></li>
-      <li><a href="contact.html">Kontakt</a></li>
-    </ul>
-    <button class="nav-hamburger" id="hamburger" aria-label="Meny">
-      <span></span><span></span><span></span>
-    </button>
-  </nav>
-
-  <div class="nav-mobile-menu" id="mobile-menu">
-    <a href="index.html">Hjem</a>
-    <a href="works.html">Kolleksjon</a>
-    <a href="about.html">Studio</a>
-    <a href="contact.html">Kontakt</a>
-  </div>
+  <nav id="nav"></nav>
+  <div class="nav-mobile-menu" id="mobile-menu"></div>
 
   <div class="text-page">
     <h1>Kontakt</h1>
     <p>
       Studio Glazebrook<br>
       Oslo<br>
-      <a href="mailto:din@epost.no">din@epost.no</a>
+      <a href="mailto:din@epost.no">edvard@grape.no</a>
     </p>
 
     <form class="contact-form" id="contact-form">
@@ -54,21 +38,11 @@
     </form>
   </div>
 
+  <script src="nav.js"></script>
   <script>
-    document.getElementById('hamburger').addEventListener('click', function() {
-      this.classList.toggle('open');
-      document.getElementById('mobile-menu').classList.toggle('open');
-    });
-    document.querySelectorAll('#mobile-menu a').forEach(function(a) {
-      a.addEventListener('click', function() {
-        document.getElementById('hamburger').classList.remove('open');
-        document.getElementById('mobile-menu').classList.remove('open');
-      });
-    });
-
     document.getElementById('contact-form').addEventListener('submit', function(e) {
       e.preventDefault();
-      e.target.innerHTML = '<p style="padding:20px 0; letter-spacing:0.1em">Takk for meldingen — vi tar kontakt snart.</p>';
+      e.target.innerHTML = '<p style="padding:20px 0; letter-spacing:0.1em">Takk for meldingen, vi tar kontakt snart.</p>';
     });
   </script>
 
