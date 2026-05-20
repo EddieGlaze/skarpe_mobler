@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
         product.number + ' ' + product.name +
         '<span class="dot-' + (product.status || 'empty') + '"></span>' +
       '</div>' +
-      '<div class="product-meta">' +
+     '<div class="product-meta">' +
         '<span class="product-nav-prev" id="proj-prev">' + prevSvg + '</span>' +
         '<span class="product-nav-gap"></span>' +
         '<span class="product-nav-next" id="proj-next">' + nextSvg + '</span>' +
