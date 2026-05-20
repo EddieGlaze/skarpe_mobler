@@ -6,7 +6,6 @@
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 html { overflow-y: scroll; }
 html, body { height: 100%; }
-body.page-product { overflow: hidden; }
 
 /* --- Typografi og base --- */
 body {
@@ -104,7 +103,6 @@ body.page-home { overflow: hidden; }
   top: 60px;
   bottom: 48px;
   z-index: 0;
-}
 }
 .slide {
   position: absolute;
@@ -268,6 +266,7 @@ body.page-home { overflow: hidden; }
   width: 7px;
   height: 7px;
 }
+
 #overlay-info {
   position: fixed;
   bottom: 32px;
@@ -279,6 +278,7 @@ body.page-home { overflow: hidden; }
   gap: 4px;
   cursor: default;
 }
+
 /* Forespørsel-knapp */
 .btn-inquiry {
   display: inline-block;
@@ -386,7 +386,7 @@ body.page-home { overflow: hidden; }
   border-radius: 50%;
   border: 1px solid #111;
   vertical-align: middle;
-  margin-left: 8px;
+  margin-left: auto;
   flex-shrink: 0;
 }
 .dot-full  { background: #111; }
@@ -414,7 +414,7 @@ body.page-home { overflow: hidden; }
   .nav-links { display: none; }
   .nav-hamburger { display: flex; }
 
-  #slideshow { inset: 16px; top: 52px; }
+  #slideshow { left: 16px; right: 16px; top: 52px; bottom: 16px; }
   .nav-mobile-menu { top: 52px; }
 
   .page-content { scrollbar-gutter: auto; }
@@ -438,18 +438,22 @@ body.page-home { overflow: hidden; }
     background: rgba(255,255,255,0.95);
   }
   .product-images {
-    position: relative;
-    top: 0;
+    position: fixed;
+    top: 200px;
+    left: 0;
+    right: 0;
+    bottom: 0;
     padding: 16px;
-    overflow-y: visible;
+    overflow-y: scroll;
     scrollbar-gutter: auto;
     gap: 16px;
   }
-  .product-images img { width: 100%; }
+  .product-images img { width: 90%; }
   #overlay-img {
     max-width: calc(100vw - 16px);
     max-height: calc(100vh - 16px);
   }
   .product-nav-prev,
-  .product-nav-next { display: none; }
+  .product-nav-next { opacity: 0.4; }
+  #overlay-info { bottom: 16px; }
 }
