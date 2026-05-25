@@ -27,6 +27,7 @@ const products = [
     description: "Loungebord, utviklet som versjon to i en bordserie. Bordplaten er utformet med fire sirkler som glir inn i hverandre, med kurvede ben plassert under hver sirkel. Bordet er skåret ut av benkeplater i furu, som er limt sammen og beiset med en sort lakkbeis.",
     price: null,
     status: "half",
+    coverImage: "3.jpg",
     slides: ["0.jpg","4.jpg","5.jpg","6.jpg"]
   },
   {
