@@ -38,6 +38,7 @@ const products = [
     description: "Loungebord i alufoam, utviklet som tredje versjon av en tidligere bordserie. Bordplaten består av fire sirkler som glir over i hverandre, med ben plassert under hver sirkel. Materialet gir bordet en lett konstruksjon og et dempet, metallisk uttrykk.",
     price: null,
     status: "full",
+    coverImage: "1.jpg",
     slides: ["1.jpg","5.jpg","3.jpg","4.jpg"]
   },
   {
