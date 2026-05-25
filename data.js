@@ -41,7 +41,7 @@ const products = [
   },
   {
     id: "Hylle-kragende",
-    number: "05",
+    number: "07",
     name: "Hylle Kragende",
     year: 2025,
     description: "Kragende hylle i 4 mm rustfritt stål. Hyllen er bygget opp av laserkuttede deler og skrudd sammen til en solid konstruksjon med et slankt og presist uttrykk.",
@@ -61,7 +61,7 @@ const products = [
   },
   {
     id: "Kaffebord",
-    number: "07",
+    number: "05",
     name: "Kaffebord",
     year: 2025,
     description: "Kaffebord i 3 mm rustfritt stål, utviklet som fjerde versjon av samme bordserie. Bordet er bygget opp av laserkuttede deler som skrus sammen med presise sammenføyninger. Konstruksjonen gjør bordet sterkt, tydelig og teknisk i uttrykket.",
