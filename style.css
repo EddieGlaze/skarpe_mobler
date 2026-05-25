@@ -7,6 +7,18 @@
 html { overflow-y: scroll; }
 html, body { height: 100%; }
 
+/* Skjul den overflødige viewport-scrollbaren på produktsider (desktop) */
+@media (min-width: 769px) {
+  html:has(body.page-product) { overflow-y: hidden; }
+}
+
+/* --- Scrollbar-stil (tynnere og lysere) --- */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d0d0d0; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #aaa; }
+* { scrollbar-width: thin; scrollbar-color: #d0d0d0 transparent; }
+
 /* --- Typografi og base --- */
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -291,6 +303,7 @@ body.page-home { overflow: hidden; }
   text-transform: uppercase;
   cursor: pointer;
   background: transparent;
+  color: #111;
   transition: background 0.2s, color 0.2s;
 }
 .btn-inquiry:hover { background: #111; color: #fff; }
@@ -407,6 +420,13 @@ body.page-home { overflow: hidden; }
   letter-spacing: 0.06em;
   color: #666;
 }
+.status-list li .dot-full,
+.status-list li .dot-half,
+.status-list li .dot-empty {
+  margin-left: 0;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
 
 /* --- Responsiv (mobil) --- */
 @media (max-width: 768px) {
@@ -438,14 +458,15 @@ body.page-home { overflow: hidden; }
     background: rgba(255,255,255,0.95);
   }
   .product-images {
-    position: fixed;
-    top: 200px;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    height: auto;
+    overflow-y: visible;
+    overflow-x: hidden;
     padding: 16px;
-    overflow-y: scroll;
-    scrollbar-gutter: auto;
     gap: 16px;
   }
   .product-images img { width: 90%; }

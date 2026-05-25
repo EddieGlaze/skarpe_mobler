@@ -22,7 +22,10 @@
   <script src="data.js"></script>
   <script>
     const grid = document.getElementById('works-grid');
-    products.forEach(function(p) {
+    const sorted = products.slice().sort(function(a, b) {
+      return parseInt(a.number) - parseInt(b.number);
+    });
+    sorted.forEach(function(p) {
       const cover = p.coverImage
         ? 'images/' + p.id + '/' + p.coverImage
         : 'images/' + p.id + '/0.jpg';
