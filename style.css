@@ -43,20 +43,24 @@ img { display: block; max-width: 100%; }
   background: rgba(255,255,255,0.96);
 }
 .nav-logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
   font-size: 11px;
   font-weight: 400;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   white-space: nowrap;
 }
+/* Logo-merke: sentrert mellom venstre skjermkant og teksten (nav har 72px venstre padding) */
+.nav-logo-mark {
+  position: absolute;
+  left: 36px;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  line-height: 0;
+}
 .nav-logo-img {
-  height: 22px;
-  width: auto;
+  height: 44px;
+  width: 44px;
   display: block;
-  flex-shrink: 0;
 }
 .nav-links {
   list-style: none;
@@ -442,6 +446,7 @@ body.page-home { overflow: hidden; }
   #nav { padding: 16px; }
   .nav-links { display: none; }
   .nav-hamburger { display: flex; }
+  .nav-logo-mark { display: none; }
 
   #slideshow { left: 16px; right: 16px; top: 52px; bottom: 16px; }
   .nav-mobile-menu { top: 52px; }
