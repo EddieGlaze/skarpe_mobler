@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var nextProduct = products[nextIdx];
 
     document.title = product.name + ' — Studio Glazebrook';
-    history.pushState(null, '', 'product.html?id=' + product.id);
+    history.pushState(null, '', '?id=' + product.id);
 
     var priceHTML = product.price
       ? '<div class="product-price">NOK ' + product.price.toLocaleString('no-NO') + '</div>'
@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function() {
       '</div>' +
       '<div class="product-description"><p>' + product.description + '</p></div>' +
       priceHTML +
-      '<button class="btn-inquiry" onclick="window.location.href=\'contact.html?inquiry=' + product.id + '\'">Forespørsel</button>';
+      '<button class="btn-inquiry" onclick="window.location.href=\'/kontakt/?inquiry=' + product.id + '\'">Forespørsel</button>';
 
     // Oppdater bildeliste
     var imagesHTML = '';
@@ -91,10 +91,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Sidebar-piler: vanlig navigasjon
     document.getElementById('proj-prev').onclick = function() {
-      window.location.href = 'product.html?id=' + prevProduct.id;
+      window.location.href = '/produkt/?id=' + prevProduct.id;
     };
     document.getElementById('proj-next').onclick = function() {
-      window.location.href = 'product.html?id=' + nextProduct.id;
+      window.location.href = '/produkt/?id=' + nextProduct.id;
     };
 
     // Overlay-piler: bli i overlay, last nytt prosjekt

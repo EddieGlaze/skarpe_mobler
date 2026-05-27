@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kontakt — Studio Glazebrook</title>
+  <base href="/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <nav id="nav"></nav>
+  <div class="nav-mobile-menu" id="mobile-menu"></div>
+
+  <div class="text-page">
+    <h1>Kontakt</h1>
+    <p>
+      Studio Glazebrook<br>
+      Oslo<br>
+      <a href="mailto:edvard@grape.no">edvard@grape.no</a>
+    </p>
+
+    <form class="contact-form" id="contact-form">
+      <div class="form-field">
+        <label>Navn</label>
+        <input type="text" name="name" required>
+      </div>
+      <div class="form-field">
+        <label>E-post</label>
+        <input type="email" name="email" required>
+      </div>
+      <div class="form-field">
+        <label>Melding</label>
+        <textarea name="message" required></textarea>
+      </div>
+      <button type="submit" class="btn-inquiry">Send</button>
+    </form>
+  </div>
+
+  <script src="nav.js"></script>
+  <script>
+    // Fyll inn produktnavn automatisk ved forespørsel fra produktside
+    var inquiry = new URLSearchParams(window.location.search).get('inquiry');
+    if (inquiry) {
+      var msg = document.querySelector('[name="message"]');
+      if (msg) msg.value = 'Forespørsel angående: ' + inquiry;
+    }
+
+    document.getElementById('contact-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var form = e.target;
+      var btn = form.querySelector('button');
+      btn.disabled = true;
+      btn.textContent = 'Sender...';
+
+      fetch('https://formsubmit.co/ajax/edvard@grape.no', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          navn: form.querySelector('[name="name"]').value,
+          epost: form.querySelector('[name="email"]').value,
+          melding: form.querySelector('[name="message"]').value,
+          _subject: 'Ny henvendelse — Studio Glazebrook'
+        })
+      })
+      .then(function(res) { return res.json(); })
+      .then(function() {
+        form.innerHTML = '<p style="padding:20px 0; letter-spacing:0.1em">Takk for meldingen, vi tar kontakt snart.</p>';
+      })
+      .catch(function() {
+        btn.disabled = false;
+        btn.textContent = 'Send';
+        form.insertAdjacentHTML('beforeend', '<p style="color:#c00;margin-top:12px;font-size:12px">Noe gikk galt. Send e-post direkte til <a href="mailto:edvard@grape.no">edvard@grape.no</a></p>');
+      });
+    });
+  </script>
+
+</body>
+</html>

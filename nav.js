@@ -3,21 +3,21 @@ document.addEventListener('DOMContentLoaded', function() {
   var mobileMenu = document.getElementById('mobile-menu');
 
   nav.innerHTML =
-    '<a href="index.html" class="nav-logo">Studio Glazebrook</a>' +
+    '<a href="/" class="nav-logo">Studio Glazebrook</a>' +
     '<ul class="nav-links">' +
-      '<li><a href="works.html">Kolleksjon</a></li>' +
-      '<li><a href="about.html">Studio</a></li>' +
-      '<li><a href="contact.html">Kontakt</a></li>' +
+      '<li><a href="/kolleksjon/">Kolleksjon</a></li>' +
+      '<li><a href="/studio/">Studio</a></li>' +
+      '<li><a href="/kontakt/">Kontakt</a></li>' +
     '</ul>' +
     '<button class="nav-hamburger" id="hamburger" aria-label="Meny">' +
       '<span></span><span></span><span></span>' +
     '</button>';
 
   mobileMenu.innerHTML =
-    '<a href="index.html">Hjem</a>' +
-    '<a href="works.html">Kolleksjon</a>' +
-    '<a href="about.html">Studio</a>' +
-    '<a href="contact.html">Kontakt</a>';
+    '<a href="/">Hjem</a>' +
+    '<a href="/kolleksjon/">Kolleksjon</a>' +
+    '<a href="/studio/">Studio</a>' +
+    '<a href="/kontakt/">Kontakt</a>';
 
   document.getElementById('hamburger').addEventListener('click', function() {
     this.classList.toggle('open');
