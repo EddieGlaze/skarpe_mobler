@@ -39,23 +39,19 @@ img { display: block; max-width: 100%; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 72px;
+  padding: 16px 72px;
   background: rgba(255,255,255,0.96);
 }
 .nav-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
   font-size: 11px;
   font-weight: 400;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   white-space: nowrap;
-}
-/* Logo-merke: sentrert mellom venstre skjermkant og teksten (nav har 72px venstre padding) */
-.nav-logo-mark {
-  position: absolute;
-  left: 36px;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  line-height: 0;
 }
 .nav-logo-img {
   height: 25px;
@@ -101,7 +97,7 @@ img { display: block; max-width: 100%; }
 .nav-mobile-menu {
   display: none;
   position: fixed;
-  top: 60px;
+  top: 80px;
   left: 0;
   right: 0;
   background: rgba(255,255,255,0.98);
@@ -194,17 +190,17 @@ body.page-home { overflow: hidden; }
 /* --- Produktside --- */
 .product-layout {
   position: relative;
-  height: calc(100vh - 60px);
-  margin-top: 60px;
+  height: calc(100vh - 80px);
+  margin-top: 80px;
   overflow: hidden;
 }
 
 .product-sidebar {
   position: fixed;
-  top: 60px;
+  top: 80px;
   left: 0;
   width: 320px;
-  height: calc(100vh - 60px);
+  height: calc(100vh - 80px);
   padding: 48px 72px;
   display: flex;
   flex-direction: column;
@@ -250,7 +246,7 @@ body.page-home { overflow: hidden; }
 
 .product-images {
   position: fixed;
-  top: 60px;
+  top: 80px;
   left: 0;
   right: 0;
   bottom: 0;
@@ -446,7 +442,7 @@ body.page-home { overflow: hidden; }
   #nav { padding: 16px; }
   .nav-links { display: none; }
   .nav-hamburger { display: flex; }
-  .nav-logo-mark { display: none; }
+  .nav-logo-img { display: none; }
 
   #slideshow { left: 16px; right: 16px; top: 52px; bottom: 16px; }
   .nav-mobile-menu { top: 52px; }
