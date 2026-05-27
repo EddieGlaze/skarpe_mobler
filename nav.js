@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
   var mobileMenu = document.getElementById('mobile-menu');
 
   nav.innerHTML =
-    '<a href="/" class="nav-logo">Studio Glazebrook</a>' +
+    '<a href="/" class="nav-logo"><img src="/logo.svg" class="nav-logo-img" alt="">Studio Glazebrook</a>' +
     '<ul class="nav-links">' +
       '<li><a href="/kolleksjon/">Kolleksjon</a></li>' +
       '<li><a href="/studio/">Studio</a></li>' +
