@@ -1,83 +1,62 @@
 <!DOCTYPE html>
-<html lang="no">
+<html lang="nb">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Personvern — L-appen — Studio Glazebrook</title>
-  <link rel="icon" href="/logo.svg?v=3" type="image/svg+xml">
-  <base href="/">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
-  <style>
-    .text-page h2 {
-      font-size: 11px;
-      font-weight: 400;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: #999;
-      margin: 40px 0 16px;
-    }
-    .text-page ul { margin: 0 0 20px 18px; line-height: 1.9; }
-    .text-page li { margin-bottom: 8px; }
-    .text-page .datert { color: #999; font-size: 12px; margin-bottom: 40px; }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Personvernerklæring — L-appen</title>
+<link rel="icon" href="/logo.svg?v=3" type="image/svg+xml">
+<style>
+  body { font-family: -apple-system, "Segoe UI", Roboto, sans-serif; max-width: 720px;
+         margin: 0 auto; padding: 32px 20px 64px; color: #1c1c1e; line-height: 1.6; }
+  h1 { font-size: 1.7rem; } h2 { font-size: 1.15rem; margin-top: 1.8em; }
+  .oppdatert { color: #6c6e73; font-size: 0.9rem; }
+  @media (prefers-color-scheme: dark) { body { background: #111; color: #eee; }
+    .oppdatert { color: #999; } a { color: #7ab8ff; } }
+</style>
 </head>
 <body>
+<h1>Personvernerklæring for L-appen</h1>
+<p class="oppdatert">Sist oppdatert: 30. juli 2026</p>
 
-  <nav id="nav"></nav>
-  <div class="nav-mobile-menu" id="mobile-menu"></div>
+<p>L-appen er en øvingsapp for teoriprøven til førerkort klasse B, utgitt av Studio
+Glazebrook. Appen er laget for å samle inn så lite data som overhodet mulig — den
+krever ingen brukerkonto, ingen innlogging og ingen personopplysninger.</p>
 
-  <div class="text-page">
-    <h1>Personvernerklæring — L-appen</h1>
-    <p class="datert">Sist oppdatert 30. juli 2026</p>
+<h2>Hvilke data lagres?</h2>
+<ul>
+  <li><strong>Anonym enhets-ID:</strong> Appen lager en tilfeldig ID på enheten din
+      (f.eks. «b9de0f22-…»). Den inneholder ingen informasjon om deg og kan ikke kobles
+      til navn, e-post eller telefonnummer.</li>
+  <li><strong>Øvingsstatistikk:</strong> Hvilke spørsmål du har besvart riktig og feil,
+      og resultater fra øvingsrunder. Lagres på enheten din, med en sikkerhetskopi
+      knyttet til den anonyme enhets-ID-en, slik at fremdriften kan gjenopprettes.</li>
+  <li><strong>Innmeldte forbedringsforslag:</strong> Hvis du bruker «Meld inn justering»,
+      lagres teksten du skriver sammen med den anonyme enhets-ID-en.</li>
+</ul>
 
-    <p>L-appen er en øvingsapp for teoriprøven til førerkort klasse B, utgitt av
-    Studio Glazebrook. Appen er laget for å samle inn så lite data som overhodet
-    mulig — den krever ingen brukerkonto, ingen innlogging og ingen
-    personopplysninger.</p>
+<h2>Hva lagres IKKE?</h2>
+<p>Ingen navn, e-postadresser, telefonnumre, posisjonsdata, kontakter, bilder eller
+betalingsopplysninger. Appen har ingen annonser og ingen sporing på tvers av apper
+eller nettsteder.</p>
 
-    <h2>Hvilke data lagres</h2>
-    <ul>
-      <li><strong>Anonym enhets-ID:</strong> Appen lager en tilfeldig ID på enheten
-      din. Den inneholder ingen informasjon om deg og kan ikke kobles til navn,
-      e-post eller telefonnummer.</li>
-      <li><strong>Øvingsstatistikk:</strong> Hvilke spørsmål du har besvart riktig
-      og feil, og resultater fra øvingsrunder. Lagres på enheten din, med en
-      sikkerhetskopi knyttet til den anonyme enhets-ID-en, slik at fremdriften kan
-      gjenopprettes.</li>
-      <li><strong>Innmeldte forbedringsforslag:</strong> Bruker du «Meld inn
-      justering», lagres teksten du skriver sammen med den anonyme enhets-ID-en.</li>
-    </ul>
+<h2>Kjøp</h2>
+<p>Alle kjøp gjennomføres av Apple via App Store (In-App Purchase). Betalingsopplysningene
+dine håndteres utelukkende av Apple — appen mottar kun en anonym bekreftelse på at et
+kjøp er gyldig, og ser aldri kortnummer eller identitet.</p>
 
-    <h2>Hva lagres ikke</h2>
-    <p>Ingen navn, e-postadresser, telefonnumre, posisjonsdata, kontakter, bilder
-    eller betalingsopplysninger. Appen har ingen annonser og ingen sporing på tvers
-    av apper eller nettsteder.</p>
+<h2>Hvor lagres dataene?</h2>
+<p>Sikkerhetskopien av øvingsstatistikken lagres hos Supabase (databaseleverandør) på
+servere i EU/EØS. Dataene er beskyttet med tilgangsregler som gjør at hver enhet kun
+kan lese og skrive sine egne data.</p>
 
-    <h2>Kjøp</h2>
-    <p>Alle kjøp gjennomføres av Apple via App Store (In-App Purchase).
-    Betalingsopplysningene dine håndteres utelukkende av Apple — appen mottar kun
-    en anonym bekreftelse på at et kjøp er gyldig, og ser aldri kortnummer eller
-    identitet.</p>
+<h2>Sletting</h2>
+<p>Du kan når som helst slette all fremdrift med «Nullstill statistikk» i appen — dette
+sletter også sikkerhetskopien i skyen. Sletter du appen, blir dataene på enheten borte,
+og den anonyme sikkerhetskopien blir liggende uvirksom uten kobling til noen person.</p>
 
-    <h2>Hvor dataene lagres</h2>
-    <p>Sikkerhetskopien av øvingsstatistikken lagres hos Supabase
-    (databaseleverandør) på servere i EU/EØS. Dataene er beskyttet med
-    tilgangsregler som gjør at hver enhet kun kan lese og skrive sine egne data.</p>
-
-    <h2>Sletting</h2>
-    <p>Du kan når som helst slette all fremdrift med «Nullstill statistikk» i appen
-    — dette sletter også sikkerhetskopien i skyen. Sletter du appen, blir dataene
-    på enheten borte, og den anonyme sikkerhetskopien blir liggende uvirksom uten
-    kobling til noen person.</p>
-
-    <h2>Kontakt</h2>
-    <p>Spørsmål om personvern eller appen for øvrig:
-    <a href="mailto:edvaglaz@gmail.com">edvaglaz@gmail.com</a></p>
-  </div>
-
-  <script src="nav.js"></script>
-
+<h2>Kontakt</h2>
+<p>Spørsmål om personvern eller appen for øvrig kan sendes til
+<a href="mailto:edvaglaz@gmail.com">edvaglaz@gmail.com</a>.</p>
 </body>
 </html>
