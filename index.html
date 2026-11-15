@@ -64,7 +64,7 @@ button { font: inherit; color: inherit }
 
 .verktoy { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 24px; padding-block: 14px 0 }
 .knapper, .faner { display: flex; flex-wrap: wrap; gap: 4px 18px }
-.knapper button, .faner button { background: none; border: 0; padding: 4px 0; cursor: pointer; color: var(--gra); font-size: 13px }
+.knapper button, .faner button { background: none; border: 0; padding: 4px 0; color: var(--gra); font-size: 13px }
 .knapper button span { font-size: 11px; font-variant-numeric: tabular-nums; margin-left: 2px }
 .knapper button:hover, .faner button:hover { color: var(--blekk) }
 .knapper button[aria-pressed="true"], .faner button[aria-pressed="true"] { color: var(--blekk); box-shadow: inset 0 -1.5px 0 var(--kobber) }
@@ -141,7 +141,7 @@ button { font: inherit; color: inherit }
 .kar-linje a { color: var(--blekk); text-decoration: none }
 .kar-linje a:hover { text-decoration: underline; text-underline-offset: 3px }
 .kar-styr { display: inline-flex; align-items: baseline; gap: 10px; font-variant-numeric: tabular-nums; white-space: nowrap }
-.kar-styr button { background: none; border: 0; padding: 2px 4px; cursor: pointer; color: var(--gra); font-size: 14px }
+.kar-styr button { background: none; border: 0; padding: 2px 4px; color: var(--gra); font-size: 14px }
 .kar-styr button:hover { color: var(--blekk) }
 @media (prefers-reduced-motion: reduce) { .kar-bilde, .kar-bilde.aktiv { transition: none } }
 .omstudio { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: clamp(20px, 4vw, 64px); margin-top: clamp(40px, 6vw, 80px); padding-top: 10px; border-top: 1.5px solid var(--blekk) }
@@ -160,7 +160,7 @@ button { font: inherit; color: inherit }
 .bildeside img { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M6 6L18 18M18 6L6 18' stroke='%23ffffff' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") 12 12, pointer; display: block; max-width: min(1200px, 100%); max-height: calc(100svh - 120px); width: auto; height: auto; object-fit: contain; min-height: 0 }
 .bs-linje { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 18px; font-size: 12.5px; color: var(--gra); font-variant-numeric: tabular-nums }
 .bs-linje b { color: var(--blekk); font-weight: 700 }
-.bs-linje a, .bs-lukk { cursor: pointer; color: var(--blekk); text-decoration: none }
+.bs-linje a, .bs-lukk { color: var(--blekk); text-decoration: none }
 .bs-lukk { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M6 6L18 18M18 6L6 18' stroke='%231d1f23' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") 12 12, pointer }
 .bs-linje a:hover { text-decoration: underline; text-underline-offset: 3px }
 /* delt X-peker (nettside_klient.js): systempekeren skjules, en sort X følger musa og en hvit X vises bare innenfor bildet */
@@ -169,6 +169,22 @@ button { font: inherit; color: inherit }
 .mk-hvit { position: absolute }
 .mk-vindu { position: fixed; overflow: hidden; pointer-events: none; z-index: 1001 }
 .mk svg { display: block }
+/* ---- pekere (Edvard 15.11.2026): lys grått pluss der ingenting kan klikkes, sort pluss over det som kan klikkes, delt X på bildesiden ---- */
+html { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M12 4.7V19.3M4.7 12H19.3' stroke='%23b4b8be' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") 12 12, default }
+html * { cursor: inherit }
+a, button, label, select, summary, .kort, .bildelenke, .kar-bilde a, .knapper button, .faner button, .kar-styr button, .bs-linje a { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M12 4.7V19.3M4.7 12H19.3' stroke='%231d1f23' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") 12 12, pointer }
+.bildeside { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M6 6L18 18M18 6L6 18' stroke='%231d1f23' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") 12 12, pointer }
+.bildeside img { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M6 6L18 18M18 6L6 18' stroke='%23ffffff' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") 12 12, pointer }
+.bs-lukk { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M6 6L18 18M18 6L6 18' stroke='%231d1f23' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") 12 12, pointer }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M12 4.7V19.3M4.7 12H19.3' stroke='%235c6068' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") 12 12, default }
+  :root:not([data-theme="light"]) a, :root:not([data-theme="light"]) button, :root:not([data-theme="light"]) label, :root:not([data-theme="light"]) select, :root:not([data-theme="light"]) summary, :root:not([data-theme="light"]) .kort, :root:not([data-theme="light"]) .bildelenke, :root:not([data-theme="light"]) .kar-bilde a, :root:not([data-theme="light"]) .knapper button, :root:not([data-theme="light"]) .faner button, :root:not([data-theme="light"]) .kar-styr button, :root:not([data-theme="light"]) .bs-linje a { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M12 4.7V19.3M4.7 12H19.3' stroke='%23e6e7ea' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") 12 12, pointer }
+  :root:not([data-theme="light"]) .bildeside, :root:not([data-theme="light"]) .bs-lukk { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M6 6L18 18M18 6L6 18' stroke='%23e6e7ea' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") 12 12, pointer }
+}
+:root[data-theme="dark"] { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M12 4.7V19.3M4.7 12H19.3' stroke='%235c6068' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") 12 12, default }
+:root[data-theme="dark"] a, :root[data-theme="dark"] button, :root[data-theme="dark"] label, :root[data-theme="dark"] select, :root[data-theme="dark"] summary, :root[data-theme="dark"] .kort, :root[data-theme="dark"] .bildelenke, :root[data-theme="dark"] .kar-bilde a, :root[data-theme="dark"] .knapper button, :root[data-theme="dark"] .faner button, :root[data-theme="dark"] .kar-styr button, :root[data-theme="dark"] .bs-linje a { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M12 4.7V19.3M4.7 12H19.3' stroke='%23e6e7ea' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") 12 12, pointer }
+:root[data-theme="dark"] .bildeside, :root[data-theme="dark"] .bs-lukk { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M6 6L18 18M18 6L6 18' stroke='%23e6e7ea' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") 12 12, pointer }
+.delt-x .bildeside, .delt-x .bildeside * { cursor: none !important }
 .bs-lukk { position: absolute; top: calc(8px + env(safe-area-inset-top, 0px)); right: 0; font-size: 26px; line-height: 1; padding: 6px 4px }
 
 /* ---- produktsiden ---- */
@@ -596,7 +612,7 @@ button { font: inherit; color: inherit }
   function mkPaa() {
     if (!fin || mk) return;
     mk = { sort: document.createElement('div'), vindu: document.createElement('div'), hvit: document.createElement('div') };
-    mk.sort.className = 'mk mk-sort'; mk.sort.innerHTML = xSvg('#1d1f23');
+    mk.sort.className = 'mk mk-sort'; mk.sort.innerHTML = xSvg((getComputedStyle(document.documentElement).getPropertyValue('--blekk') || '').trim() || '#1d1f23');
     mk.vindu.className = 'mk-vindu'; mk.hvit.className = 'mk mk-hvit'; mk.hvit.innerHTML = xSvg('#ffffff'); mk.vindu.appendChild(mk.hvit);
     document.body.appendChild(mk.sort); document.body.appendChild(mk.vindu);
     document.documentElement.classList.add('delt-x'); mkPlasser();
