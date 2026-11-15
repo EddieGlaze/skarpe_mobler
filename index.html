@@ -75,7 +75,7 @@ button { font: inherit; color: inherit }
   grid-template-columns: repeat(auto-fill, minmax(min(var(--rute), calc((100% - var(--mellom)) / 2)), 1fr)); column-gap: var(--mellom); row-gap: 0 }
 .rute { display: grid; grid-row: span 2; grid-template-rows: subgrid; grid-template-columns: minmax(0, 1fr); min-width: 0 }
 .rute .kort { display: grid; grid-row: 1 / -1; grid-template-rows: subgrid; grid-template-columns: minmax(0, 1fr) }
-.kort { text-decoration: none; min-width: 0 }
+.kort { text-decoration: none; min-width: 0; cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M12 4.7V19.3M4.7 12H19.3' stroke='%231d1f23' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") 12 12, pointer }   /* sort pluss over tegningene */
 .etikett { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 10px; padding: 6px 2px 0; border-top: 1px solid var(--blekk); font-size: 12.5px; line-height: 1.3 }
 .rute .etikett { grid-row: 1; align-self: start; margin-top: clamp(26px, 3vw, 44px) }
 .rute.stor, .rute.bred { grid-column: span 2 }
@@ -151,18 +151,24 @@ button { font: inherit; color: inherit }
 @media (max-width: 720px) { .omstudio { grid-template-columns: minmax(0, 1fr) } }
 
 /* ---- bilde i stort format: egen side, hvit som resten, X som markør; klikk hvor som helst går tilbake ---- */
-.bildelenke { display: block; cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Cpath d='M18 7V29M7 18H29' stroke='%23ffffff' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E") 18 18, zoom-in }   /* hvitt pluss over bildene */
-.kar-bilde a { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Cpath d='M18 7V29M7 18H29' stroke='%23ffffff' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E") 18 18, pointer }
+.bildelenke { display: block; cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M12 4.7V19.3M4.7 12H19.3' stroke='%23ffffff' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") 12 12, zoom-in }   /* hvitt pluss over bildene */
+.kar-bilde a { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M12 4.7V19.3M4.7 12H19.3' stroke='%23ffffff' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") 12 12, pointer }
 .bildelenke:hover img { opacity: .92 }
 .bildeside { position: relative; display: grid; grid-template-rows: minmax(0, 1fr) auto; justify-items: center; align-items: center; gap: 10px;
   min-height: 100svh; padding-block: calc(44px + env(safe-area-inset-top, 0px)) calc(16px + env(safe-area-inset-bottom, 0px));
-  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Cpath d='M9 9L27 27M27 9L9 27' stroke='%231d1f23' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E") 18 18, pointer }   /* sort X over det hvite */
-.bildeside img { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Cpath d='M9 9L27 27M27 9L9 27' stroke='%23ffffff' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E") 18 18, pointer; display: block; max-width: min(1200px, 100%); max-height: calc(100svh - 120px); width: auto; height: auto; object-fit: contain; min-height: 0 }
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M6 6L18 18M18 6L6 18' stroke='%231d1f23' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") 12 12, pointer }   /* sort X over det hvite */
+.bildeside img { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M6 6L18 18M18 6L6 18' stroke='%23ffffff' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") 12 12, pointer; display: block; max-width: min(1200px, 100%); max-height: calc(100svh - 120px); width: auto; height: auto; object-fit: contain; min-height: 0 }
 .bs-linje { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 18px; font-size: 12.5px; color: var(--gra); font-variant-numeric: tabular-nums }
 .bs-linje b { color: var(--blekk); font-weight: 700 }
 .bs-linje a, .bs-lukk { cursor: pointer; color: var(--blekk); text-decoration: none }
-.bs-lukk { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Cpath d='M9 9L27 27M27 9L9 27' stroke='%231d1f23' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E") 18 18, pointer }
+.bs-lukk { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M6 6L18 18M18 6L6 18' stroke='%231d1f23' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") 12 12, pointer }
 .bs-linje a:hover { text-decoration: underline; text-underline-offset: 3px }
+/* delt X-peker (nettside_klient.js): systempekeren skjules, en sort X følger musa og en hvit X vises bare innenfor bildet */
+.delt-x .bildeside, .delt-x .bildeside * { cursor: none !important }
+.mk { position: fixed; left: 0; top: 0; width: 24px; height: 24px; pointer-events: none; z-index: 1000 }
+.mk-hvit { position: absolute }
+.mk-vindu { position: fixed; overflow: hidden; pointer-events: none; z-index: 1001 }
+.mk svg { display: block }
 .bs-lukk { position: absolute; top: calc(8px + env(safe-area-inset-top, 0px)); right: 0; font-size: 26px; line-height: 1; padding: 6px 4px }
 
 /* ---- produktsiden ---- */
@@ -525,7 +531,7 @@ button { font: inherit; color: inherit }
     var mb = h.match(/^(.+)-bilde-(\d+)$/), bi = -1;
     if (mb) for (var q = 0; q < liste.length; q++) if (liste[q].id === mb[1]) bi = q;
     if (bi >= 0 && (liste[bi].bilder || []).length) { visBilde(liste[bi], +mb[2]); return; }
-    bildeside.hidden = true; bildeside.innerHTML = '';
+    bildeside.hidden = true; bildeside.innerHTML = ''; mkAv();
     if (i >= 0) {
       var p = liste[i], bilder = bildeListe(p);
       produkt.innerHTML = produktHTML(p, i);
@@ -561,7 +567,7 @@ button { font: inherit; color: inherit }
       '<p class="bs-linje"><span><b>' + esc(p.nr) + '</b> ' + esc(p.tittel) + (p.variant ? ' ' + esc(p.variant) : '') + (b.tekst ? ' · ' + esc(b.tekst) : '') + '</span>' +
       '<span>' + k + ' / ' + ant + '</span>' +
       (ant > 1 ? '<span><a href="#' + p.id + '-bilde-' + forrige + '">← Forrige</a>&nbsp;&nbsp;<a href="#' + p.id + '-bilde-' + neste + '">Neste →</a></span>' : '') + '</p>';
-    oversikt.hidden = true; produkt.hidden = true; produkt.innerHTML = ''; bildeside.hidden = false; stopp();
+    oversikt.hidden = true; produkt.hidden = true; produkt.innerHTML = ''; bildeside.hidden = false; stopp(); mkPaa();
     document.title = p.tittel + ', bilde ' + k + ' – Studio Glazebrook';
     window.scrollTo(0, 0); fraBilde = k; bsId = p.id; sist = p.id;
   }
@@ -574,6 +580,32 @@ button { font: inherit; color: inherit }
     else if (e.key === 'ArrowLeft' && lenker[0]) location.hash = lenker[0].getAttribute('href');
     else if (e.key === 'ArrowRight' && lenker[1]) location.hash = lenker[1].getAttribute('href');
   });
+  // ---- delt X-peker på bildesiden: en sort X følger musa, og en hvit X i et vindu over bildet dekker den der bildet er ----
+  var mk = null, mkX = -99, mkY = -99;
+  var fin = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  var xSvg = function (farge) { return '<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6L18 18M18 6L6 18" stroke="' + farge + '" stroke-width="2" fill="none" stroke-linecap="round"/></svg>'; };
+  function mkPlasser() {
+    if (!mk) return;
+    var img = bildeside.querySelector('img'), r = img ? img.getBoundingClientRect() : null;
+    mk.sort.style.transform = 'translate(' + (mkX - 12) + 'px,' + (mkY - 12) + 'px)';
+    if (r) {
+      mk.vindu.style.left = r.left + 'px'; mk.vindu.style.top = r.top + 'px'; mk.vindu.style.width = r.width + 'px'; mk.vindu.style.height = r.height + 'px';
+      mk.hvit.style.transform = 'translate(' + (mkX - r.left - 12) + 'px,' + (mkY - r.top - 12) + 'px)';
+    }
+  }
+  function mkPaa() {
+    if (!fin || mk) return;
+    mk = { sort: document.createElement('div'), vindu: document.createElement('div'), hvit: document.createElement('div') };
+    mk.sort.className = 'mk mk-sort'; mk.sort.innerHTML = xSvg('#1d1f23');
+    mk.vindu.className = 'mk-vindu'; mk.hvit.className = 'mk mk-hvit'; mk.hvit.innerHTML = xSvg('#ffffff'); mk.vindu.appendChild(mk.hvit);
+    document.body.appendChild(mk.sort); document.body.appendChild(mk.vindu);
+    document.documentElement.classList.add('delt-x'); mkPlasser();
+  }
+  function mkAv() { if (!mk) return; mk.sort.remove(); mk.vindu.remove(); mk = null; document.documentElement.classList.remove('delt-x'); }
+  document.addEventListener('mousemove', function (e) { mkX = e.clientX; mkY = e.clientY; if (mk) mkPlasser(); }, { passive: true });
+  window.addEventListener('scroll', mkPlasser, { passive: true }); window.addEventListener('resize', mkPlasser);
+  document.addEventListener('mouseleave', function () { mkX = mkY = -99; mkPlasser(); });
+  bildeside.addEventListener('load', mkPlasser, true);   // bildet lastet: ny størrelse
   window.addEventListener('hashchange', vis); vis();
 })();
 
