@@ -151,8 +151,8 @@ button { font: inherit; color: inherit }
 @media (max-width: 720px) { .omstudio { grid-template-columns: minmax(0, 1fr) } }
 
 /* ---- bilde i stort format: egen side, hvit som resten, X som markør; klikk hvor som helst går tilbake ---- */
-.bildelenke { display: block; cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M12 4.7V19.3M4.7 12H19.3' stroke='%23ffffff' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") 12 12, zoom-in }   /* hvitt pluss over bildene */
-.kar-bilde a { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M12 4.7V19.3M4.7 12H19.3' stroke='%23ffffff' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") 12 12, pointer }
+.bildelenke { display: block; cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M12 4.7V19.3M4.7 12H19.3' stroke='%231d1f23' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") 12 12, zoom-in }   /* sort pluss over bildene på møbelsiden (Edvard 15.11.2026) */
+.kar-bilde a { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M12 4.7V19.3M4.7 12H19.3' stroke='%231d1f23' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") 12 12, pointer }   /* forsiden: sort pluss overalt (Edvard 15.11.2026) */
 .bildelenke:hover img { opacity: .92 }
 .bildeside { position: relative; display: grid; grid-template-rows: minmax(0, 1fr) auto; justify-items: center; align-items: center; gap: 10px;
   min-height: 100svh; padding-block: calc(44px + env(safe-area-inset-top, 0px)) calc(16px + env(safe-area-inset-bottom, 0px));
