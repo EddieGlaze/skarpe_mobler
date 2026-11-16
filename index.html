@@ -22,7 +22,6 @@
    Produktsiden: teknisk tegning (ovenfra over forfra, fra siden til høyre) og info øverst, bildene under. */
 :root {
   --papir: #ffffff; --blekk: #1d1f23; --tekst2: #4a4f57; --gra: #6b7078; --strek: #c9ccd1;
-  --laser: #d7261e;
   --vask: #f3f4f6; --kobber: #9a4a1e; --merke: #d9b9bd; --tegn: #80858d; --hjelp: #b4b8be; 
   --font: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --rute: 230px;
@@ -60,11 +59,6 @@ button { font: inherit; color: inherit }
   .hero .karusell { order: 0 }
 }
 .hode { display: flex; flex-direction: column; gap: 10px; min-width: 0 }
-.logo-g { position: relative }
-.logo-p { position: absolute; border-radius: 50%; background: var(--laser) }
-.logo-i { width: .16em; height: .16em; left: .055em; top: .1975em }   /* i-prikken: senter .135 inn, .6925 over grunnlinjen (toppen av linjen er .97 over) */
-.logo-z { width: .1175em; height: .1175em; left: .2822em; top: .8525em; box-shadow: 0 0 0 .025em var(--papir) }   /* laseren: 62 % ut på bunnstreken, midt i streken */
-.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap }
 .hode h1 { margin: 0; font-size: clamp(2.1rem, 1.5rem + 2.6vw, 3.6rem); line-height: 1; font-weight: 700; letter-spacing: -.025em; text-wrap: balance }
 .hode .serie { order: -1; margin: 0; font-size: .8rem; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--gra) }
 .hode .under { margin: 0; color: var(--tekst2); max-width: 46ch; text-wrap: pretty }
@@ -275,7 +269,7 @@ a, button, label, select, summary, .kort, .bildelenke, .kar-bilde a, .knapper bu
 <main id="oversikt">
 <section class="hero" id="kolleksjon">
 <div class="hode">
-  <h1><span class="sr">Studio Glazebrook</span><span aria-hidden="true">Stud<span class="logo-g">ı<span class="logo-p logo-i"></span></span>o Gla<span class="logo-g">z<span class="logo-p logo-z"></span></span>ebrook</span></h1>
+  <h1>Studio Glazebrook</h1>
   <p class="under">Møbler tegnet, laget og produsert av Edvard Glazebrook.</p>
   <p class="tall">Bestillinger på forespørsel.</p>
 </div>
