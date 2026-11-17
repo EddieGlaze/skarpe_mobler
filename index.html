@@ -63,7 +63,7 @@ button { font: inherit; color: inherit }
 .logo-g { position: relative }
 .logo-p { position: absolute; border-radius: 50%; background: var(--laser) }
 .logo-i { width: .16em; height: .16em; left: .055em; top: .1975em }   /* i-prikken: senter .135 inn, .6925 over grunnlinjen (toppen av linjen er .97 over) */
-.logo-z { width: .1425em; height: .1425em; left: .2698em; top: .84em; box-shadow: 0 0 0 .0125em var(--papir) }   /* laseren (Z2): 62 % ut på bunnstreken, midt i streken; halv kant, prikken fyller resten (strek .1175 + .025). G-varianten ble prøvd og forkastet 16.11 */
+/* z-laseren (Z2) er tatt ut 17.11.2026 og lagret i NettsideLogo Z2 laserprikk.html (CSS, markup og mål) */
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap }
 .hode h1 { margin: 0; font-size: clamp(2.1rem, 1.5rem + 2.6vw, 3.6rem); line-height: 1; font-weight: 700; letter-spacing: -.025em; text-wrap: balance }
 .hode .serie { order: -1; margin: 0; font-size: .8rem; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--gra) }
@@ -244,6 +244,14 @@ a, button, label, select, summary, .kort, .bildelenke, .kar-bilde a, .knapper bu
 .kontakt { align-self: start; margin-top: 6px; padding: 10px 16px; border: 1px solid var(--blekk); text-decoration: none; font-weight: 500 }
 .kontakt:hover { background: var(--strek); color: var(--blekk) }   /* grå, så den sorte pekeren synes (Edvard 15.11.2026) */
 .merk { margin: 0; color: var(--gra); font-size: 12px }
+/* tegningen (ovenfra, forfra, fra siden) som før, bare liten, under bestillingsknappen (17.11.2026) (uten ramme, valgt 17.11) */
+.smaategn { margin: 6px 0 0; width: 100%; max-width: 100% }   /* bredden settes av tilpassTegning() i nettside_klient.js */
+.smaategn .ortho.rad { display: flex; align-items: flex-end }
+.smaategn .rcelle { min-width: 0 }
+.smaategn .rcelle.ekstra { align-self: stretch; display: flex }
+.smaategn .skinncelle, .smaategn .detalj { min-height: 0 }
+.smaategn .ortho { width: 100% }
+.smaategn .vnavn, .smaategn .vnote { font-size: 8px }
 .bilder, .flere { padding-top: clamp(28px, 4vw, 56px) }
 .bilder h2, .flere h2 { margin: 0 0 14px; padding-top: 8px; border-top: 1.5px solid var(--blekk); font-size: 13px; font-weight: 700 }
 .bilder h2 span { color: var(--gra); font-weight: 400; margin-left: 4px }
@@ -275,7 +283,7 @@ a, button, label, select, summary, .kort, .bildelenke, .kar-bilde a, .knapper bu
 <main id="oversikt">
 <section class="hero" id="kolleksjon">
 <div class="hode">
-  <h1><span class="sr">Studio Glazebrook</span><span aria-hidden="true">Stud<span class="logo-g">ı<span class="logo-p logo-i"></span></span>o Gla<span class="logo-g">z<span class="logo-p logo-z"></span></span>ebrook</span></h1>
+  <h1><span class="sr">Studio Glazebrook</span><span aria-hidden="true">Stud<span class="logo-g">ı<span class="logo-p logo-i"></span></span>o Glazebrook</span></h1>
   <p class="under">Møbler tegnet, laget og produsert av Edvard Glazebrook.</p>
   <p class="tall">Bestillinger på forespørsel.</p>
 </div>
@@ -451,7 +459,12 @@ a, button, label, select, summary, .kort, .bildelenke, .kar-bilde a, .knapper bu
       '</div>';
   }
 
-  function ark(V, skr, det, sk) {
+  // ytre mål (mm, med luft) for de to oppsettene: 2×2 og rad
+  function arkMaal(V, ekstra) {
+    var B = V.forfra.w, H = V.forfra.h, D = V.siden.w, Do = V.ovenfra.h, P = Math.max(B, D, H) * 0.17;
+    return { grid: { w: B + D + 4 * P, h: Do + H + 4 * P }, rad: { w: 2 * B + D + 6 * P + (ekstra ? D + 2 * P : 0), h: Math.max(H, Do) + 2 * P } };
+  }
+  function ark(V, skr, det, sk, rad) {
     var B = V.forfra.w, H = V.forfra.h, D = V.siden.w, Do = V.ovenfra.h;
     var P = Math.max(B, D, H) * 0.17, t = P * 0.07;   // luft rundt hver visning (til målene) og lengden på målestrekene
     function strek(x1, y1, x2, y2, k) { return '<line class="' + (k || 'ml') + '" x1="' + x1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) + '"/>'; }
@@ -473,20 +486,14 @@ a, button, label, select, summary, .kort, .bildelenke, .kar-bilde a, .knapper bu
     var ovenfra = boks(V.ovenfra, B, Do, 'Ovenfra', '', [], skr && skr.ovenfra);
     var forfra = boks(V.forfra, B, H, 'Forfra', '', [], skr && skr.forfra);   // (16.11.2026: ingen mål på tegningene)
     var siden = boks(V.siden, D, H, 'Fra siden', '', [], skr && skr.siden);
+    var ekstra = det ? detalj(det) : sk ? skinnCelle(sk) : '';
+    if (rad) {   // avlang: forfra, fra siden og ovenfra på rad i samme målestokk, med bunnen i liv
+      var mm = arkMaal(V, ekstra).rad, c = function (w, html) { return '<div class="rcelle" style="width:' + (w / mm.w * 100).toFixed(3) + '%">' + html + '</div>'; };
+      return '<div class="ortho rad" style="--r:' + (mm.w / mm.h).toFixed(4) + '">' + c(B + 2 * P, forfra) + c(D + 2 * P, siden) + c(B + 2 * P, ovenfra) + (ekstra ? c(D + 2 * P, ekstra).replace('class="rcelle"', 'class="rcelle ekstra"') : '') + '</div>';
+    }
     var r = (B + D + 4 * P) / (Do + H + 4 * P);
     return '<div class="ortho" style="--r:' + r.toFixed(4) + ';grid-template-columns:minmax(0,' + (B + 2 * P).toFixed(1) + 'fr) minmax(0,' + (D + 2 * P).toFixed(1) + 'fr)">' +
       ovenfra + (det ? detalj(det) : sk ? skinnCelle(sk) : '<div class="vnote"></div>') + forfra + siden + '</div>';
-  }
-
-  // skinnmalen brettet ut, med bredde og høyde
-  function skinnArk(sk) {
-    var W = sk.w, H = sk.h, P = Math.max(W, H) * 0.12, t = P * 0.07, yM = P * 0.55, vw = W + 2 * P, vh = H + 2 * P;
-    function st(x1, y1, x2, y2, c) { return '<line class="' + (c || '') + '" x1="' + x1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) + '"/>'; }
-    var maal = st(0, H + yM, W, H + yM) + st(0, H + P * .12, 0, H + yM + t * 1.6, 'hj') + st(W, H + P * .12, W, H + yM + t * 1.6, 'hj') + st(-t, H + yM + t, t, H + yM - t, 'tikk') + st(W - t, H + yM + t, W + t, H + yM - t, 'tikk') +
-      st(-yM, 0, -yM, H) + st(-P * .12, 0, -yM - t * 1.6, 0, 'hj') + st(-P * .12, H, -yM - t * 1.6, H, 'hj') + st(-yM - t, t, -yM + t, -t, 'tikk') + st(-yM - t, H + t, -yM + t, H - t, 'tikk');
-    function pc(x, y) { return 'left:' + ((x + P) / vw * 100).toFixed(2) + '%;top:' + ((y + P) / vh * 100).toFixed(2) + '%'; }
-    return '<div class="skinnark" style="aspect-ratio:' + vw.toFixed(1) + '/' + vh.toFixed(1) + '"><span class="vnavn" style="left:0;top:0">Skinnmal</span>' +
-      '<svg viewBox="' + (-P).toFixed(1) + ' ' + (-P).toFixed(1) + ' ' + vw.toFixed(1) + ' ' + vh.toFixed(1) + '" aria-hidden="true"><path class="omr" d="' + sk.sti + '"/><path class="brett" d="' + sk.linjer + '"/></svg></div>';
   }
 
   // snitt gjennom bordplaten der et ben går inn i det freste sporet (mål i mm)
@@ -516,12 +523,7 @@ a, button, label, select, summary, .kort, .bildelenke, .kar-bilde a, .knapper bu
     return '<nav class="sti" aria-label="Plassering"><a href="#kolleksjon"><b>Studio Glazebrook</b></a><span aria-hidden="true">/</span><span>' + esc(p.tittel) + (p.variant ? ' ' + esc(p.variant) : '') + '</span>' +
       '<span class="blaa"><a href="#' + forrige.id + '">← ' + esc(forrige.tittel) + '</a><a href="#' + neste.id + '">' + esc(neste.tittel) + ' →</a></span></nav>' +
       '<section class="ptopp">' +
-        '<div class="arkfelt">' +
-          '<div class="faner" role="group" aria-label="Tegning"><button type="button" data-v="persp" aria-pressed="true">Perspektiv</button><button type="button" data-v="maal" aria-pressed="false">Tegning</button>' + (p.skinn ? '<button type="button" data-v="skinn" aria-pressed="false">Skinnmal</button>' : '') + '</div>' +
-          '<div class="arkvis persp" data-v="persp" data-iso="' + p.id + '"></div>' +
-          '<div class="arkvis" data-v="maal" hidden>' + (p.ortho ? ark(p.ortho, p.skravur, p.detalj, p.skinn) : '<p class="tom">Tegning mangler.</p>') + '</div>' +
-          (p.skinn ? '<div class="arkvis" data-v="skinn" hidden>' + skinnArk(p.skinn) + '<p class="skinnmerk">Skinnet brettet ut. Stiplet: brettelinjer. Kjernelær, ca. 3 mm.</p></div>' : '') +
-        '</div>' +
+        '<div class="arkfelt"><div class="arkvis persp" data-iso="' + p.id + '"></div></div>' +
         '<div class="info">' +
           '<p class="eyebrow">' + esc(p.nr) + ' · ' + esc(p.kat) + '</p>' +
           '<h1>' + esc(p.tittel) + (p.variant ? ' <span>' + esc(p.variant) + '</span>' : '') + '</h1>' +
@@ -536,6 +538,7 @@ a, button, label, select, summary, .kort, .bildelenke, .kar-bilde a, .knapper bu
           '</dl>' +
           '<a class="kontakt" href="#kontakt">Ta kontakt for bestilling →</a>' +
           '<p class="merk">Tilpasninger er mulig mot tillegg.</p>' +
+          (p.ortho ? '<figure class="smaategn" aria-label="Tegning" data-oppsett="grid">' + ark(p.ortho, p.skravur, p.detalj, p.skinn) + '</figure>' : '') +
         '</div>' +
       '</section>' +
       '<section class="bilder"><h2>Bilder' + (bilder.length ? ' <span>' + bilder.length + '</span>' : '') + '</h2>' +
@@ -548,6 +551,32 @@ a, button, label, select, summary, .kort, .bildelenke, .kar-bilde a, .knapper bu
       '<section class="flere"><h2>Flere i kolleksjonen</h2><ul class="minirad">' + flere.map(kortHTML).join('') + '</ul></section>';
   }
 
+  // den lille tegningen fyller plassen som er igjen under teksten (ned til bunnen av 3D-feltet);
+  // velger 2×2 eller rad etter hva som gir størst målestokk der
+  var aktivP = null;
+  function tilpassTegning() {
+    var fig = produkt.querySelector('.smaategn'), p = aktivP; if (!fig || !p || produkt.hidden) return;
+    fig.style.marginTop = '';   // måles fra der figuren ligger rett under teksten
+    var info = fig.parentElement, felt = produkt.querySelector('.arkfelt'), W = info.clientWidth;
+    var enKolonne = felt.getBoundingClientRect().right > info.getBoundingClientRect().left;   // smal skjerm: infoen ligger under 3D-feltet
+    var H = enKolonne ? Math.min(window.innerHeight * .45, 340) : Math.max(170, felt.getBoundingClientRect().bottom - fig.getBoundingClientRect().top - 18);   // 18: plass til navnene
+    if (!enKolonne) H = Math.max(150, H * .78);   // litt luft over og under, så tegningen kan midtstilles
+    var mm = arkMaal(p.ortho, p.detalj || p.skinn), best = null;
+    ['grid', 'rad'].forEach(function (k) {
+      var w = Math.min(W, H * mm[k].w / mm[k].h), skala = w / mm[k].w;
+      if (!best || skala > best.skala * 1.05) best = { k: k, w: w, skala: skala };   // rad bare når den er tydelig bedre
+    });
+    if (fig.dataset.oppsett !== best.k) { fig.innerHTML = ark(p.ortho, p.skravur, p.detalj, p.skinn, best.k === 'rad'); fig.dataset.oppsett = best.k; }
+    fig.style.width = Math.floor(best.w) + 'px';
+    // midtstilt i høyden mellom teksten og bunnlinjen til 3D-feltet (når det er plass)
+    if (!enKolonne) {
+      var over = fig.previousElementSibling.getBoundingClientRect().bottom, gap = fig.getBoundingClientRect().top - over;   // gap: mellomrommet i infokolonnen + marg
+      var fri = felt.getBoundingClientRect().bottom - over - fig.getBoundingClientRect().height;
+      fig.style.marginTop = Math.max(6, fri / 2 - (gap - 6)) + 'px';
+    }
+  }
+  var tilpassTid; window.addEventListener('resize', function () { clearTimeout(tilpassTid); tilpassTid = setTimeout(tilpassTegning, 120); });
+
   function vis() {
     var h = decodeURIComponent(location.hash.slice(1)), i = -1;
     for (var k = 0; k < liste.length; k++) if (liste[k].id === h) i = k;
@@ -559,13 +588,8 @@ a, button, label, select, summary, .kort, .bildelenke, .kar-bilde a, .knapper bu
       var p = liste[i], bilder = bildeListe(p);
       produkt.innerHTML = produktHTML(p, i);
       produkt.querySelectorAll('[data-iso]').forEach(function (el) { el.appendChild(iso(el.dataset.iso, el.classList.contains('persp'))); var n = el.querySelectorAll('svg').length; if (n > 1) el.classList.add('to'); if (n > 2) el.classList.add('tre'); });
-      produkt.querySelectorAll('.faner button').forEach(function (b) {
-        b.addEventListener('click', function () {
-          produkt.querySelectorAll('.faner button').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
-          produkt.querySelectorAll('.arkvis').forEach(function (a) { a.hidden = a.dataset.v !== b.dataset.v; });
-        });
-      });
       oversikt.hidden = true; produkt.hidden = false; stopp();
+      aktivP = p; tilpassTegning();
       document.title = p.tittel + (p.variant ? ' ' + p.variant : '') + ' – Studio Glazebrook';
       var fig = fraBilde && $('bilde-' + fraBilde);   // tilbake fra et bilde: rull til bildet
       if (fig) fig.scrollIntoView({ block: 'center' }); else window.scrollTo(0, 0);
