@@ -129,11 +129,18 @@ button { font: inherit; color: inherit }
 .kort:hover .navn { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px }
 @media (max-width: 600px) {
   .rutenett { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 12px }
-  .rute .tegning { height: auto; min-height: 100% }   /* Safari regner ikke med aspect-ratio når høyden er 100 % i subgrid: høye ruter ble smalere og brede lavere enn på PC (22.11.2026) */
+  /* Safari tar ikke med høyden fra aspect-ratio når radene i subgrid måles: med height 100 % ble rutene for lave (22.11), med height auto rant
+     tegningen og bildene over i ruta under (23.11). Derfor fast høyde ut fra kolonnebredden (cqw = bredden på rutenettet, 12 px mellom kolonnene). */
+  .rutenett { container-type: inline-size }
+  .rute .tegning { height: calc((100cqw - 12px) / 2 * 4 / 5) }
+  .rute.bred .tegning { height: calc(100cqw * 5 / 13) }
+  .rute.stor .tegning { height: calc(100cqw * 7 / 8) }
+  .rute.hoy .tegning { height: calc((100cqw - 12px) / 2 * 9 / 5) }
   :root[data-tetthet="store"] .rutenett { grid-template-columns: minmax(0, 1fr) }
   :root[data-tetthet="store"] .rute.stor, :root[data-tetthet="store"] .rute.bred { grid-column: auto }
   :root[data-tetthet="store"] .rute.stor, :root[data-tetthet="store"] .rute.hoy { grid-row: span 2 }
-  :root[data-tetthet="store"] .rute .tegning { grid-row: 2; aspect-ratio: 5 / 4 }
+  :root[data-tetthet="store"] .rute .tegning, :root[data-tetthet="store"] .rute.bred .tegning, :root[data-tetthet="store"] .rute.stor .tegning,
+  :root[data-tetthet="store"] .rute.hoy .tegning { grid-row: 2; aspect-ratio: 5 / 4; height: calc(100cqw * 4 / 5) }
   .etikett { font-size: 11.5px; gap: 6px }
   .tegning svg { left: 4%; width: 92% }
   .tetthet::before { display: none }
