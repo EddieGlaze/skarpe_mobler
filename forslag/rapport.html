@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rapport – nettbutikken</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+<link rel="stylesheet" href="forslag.css">
+<style>
+.rapport { max-width: 76ch }
+.rapport h1 { font-size: 32px; letter-spacing: -0.02em; margin: 28px 0 6px }
+.rapport h2 { font-size: 15px; margin: 34px 0 8px; padding-top: 10px; border-top: 1.5px solid var(--blekk) }
+.rapport p, .rapport li { color: var(--tekst2) }
+.rapport li { margin-bottom: 6px }
+.rapport b { color: var(--blekk) }
+.merk { font-size: 13px; color: var(--gra) }
+table.r { border-collapse: collapse; width: 100%; font-size: 14px }
+table.r th, table.r td { text-align: left; vertical-align: top; padding: 7px 8px 7px 0; border-top: 1px solid var(--strek) }
+table.r th { font-weight: 600 }
+</style>
+</head>
+<body>
+<div class="forhånd">Forhåndsvisning. Ikke den ekte nettsiden. <a href="index.html">Alle forslag</a></div>
+<div class="ramme rapport">
+<h1>Nettbutikken: status og forslag</h1>
+<p class="merk">Edvard Glazebrook · 25.11.2026 · laget mens du var logget av</p>
+
+<h2>1. Klart, men ikke publisert (venter på «Publiser nå»)</h2>
+<ul>
+<li><b>Kjøp-knapper</b> på alle 17 møbler, koblet til Stripe-betalingslenker. Pris, bilde og navn er sjekket mot Stripe.</li>
+<li><b>Salgsbetingelser</b> nederst på forsiden, med lenker fra Kjøp-knappen og bunnlinjen. Org.nr. 928 491 811 MVA og Askergata 2. Unntaket fra angrerett er rettet til <b>angrerettloven § 22 e</b> (sjekket mot Lovdata).</li>
+<li><b>Ny beskrivelse for Google og deling:</b> «Møbler i laserkuttet stål, tegnet og laget på bestilling av Edvard Glazebrook i Oslo. Faste priser, kjøp direkte, produksjonstid 2–8 uker.» Den gamle sa «Bestillinger på forespørsel».</li>
+</ul>
+
+<h2>2. Må fikses i Stripe før første salg (trenger ja fra deg)</h2>
+<table class="r">
+<tr><th>Hva</th><th>Hvorfor</th></tr>
+<tr><td><b>Slå på e-postkvitteringer</b> (Settings → Customer emails → Successful payments og Refunds)</td><td>De er av nå, men takkemeldingen i kassen lover kvittering på e-post.</td></tr>
+<tr><td><b>Kundespråk: Norsk</b> (samme side, Default language)</td><td>Står på English. Kvitteringer og e-poster blir på engelsk.</td></tr>
+<tr><td><b>Logo og farge i kassen</b> (Settings → Branding)</td><td>Kassen viser bare navnet. Logoen gir mer tillit.</td></tr>
+<tr><td><b>Søk om Vipps</b> i Stripe (privat forhåndsversjon)</td><td>Vipps er den mest brukte betalingsmåten i Norge. Klarna er allerede på.</td></tr>
+<tr><td>«Review your profile» i oppsettguiden</td><td>Står som ikke startet.</td></tr>
+<tr><td>Arkivere rundt 16 produkter som heter «(Copy) Skinnstol (M01)»</td><td>Ufarlige og usynlige for kunder, men rot i katalogen.</td></tr>
+</table>
+
+<h2>3. Hva forskningen sier, rangert</h2>
+<table class="r">
+<tr><th>#</th><th>Tiltak</th><th>Status</th></tr>
+<tr><td>1</td><td><b>Egen adresse per møbel</b> (/mobler/m04-bokhylle-rute/), ikke #-lenker. Google indekserer ikke #-sider, og Google Shopping krever en egen produktside.</td><td>Laget som forslag: <a href="mobler/m04-bokhylle-rute/">eksempel</a></td></tr>
+<tr><td>2</td><td><b>Produktdata (schema.org)</b> på hver produktside: pris, bilder, mål, vekt, merke, returregler og behandlingstid.</td><td>Med i forslaget</td></tr>
+<tr><td>3</td><td>Salgsbetingelser, angrerett, org.nr. og kontakt synlig.</td><td>Klart lokalt</td></tr>
+<tr><td>4</td><td><b>Frakt i klartekst.</b> Ifølge Baymard (2026) avgjør levering og logistikk om et møbelkjøp blir aktuelt, og 40 % avbryter kjøp på grunn av ekstrakostnader.</td><td><b>Trenger valget ditt:</b> en fast pris for levering i Oslo, for eksempel 500 kr for små og 1 000 kr for store møbler</td></tr>
+<tr><td>5</td><td><b>Bilde i skala og i rom.</b> 42 % prøver å bedømme størrelse ut fra bildene. Tegningene med mål er en styrke.</td><td>Bilder med en person eller en kjent gjenstand ved siden av mangler. Sidene uten bilder bruker tegningen.</td></tr>
+<tr><td>6</td><td><b>Kjøpsknapp alltid synlig på mobil.</b> Annonsetrafikken er nesten bare mobil.</td><td>Med i forslaget: stripe med pris og Kjøp nederst</td></tr>
+<tr><td>7</td><td>Trygghet: hvem som lager møbelet, visning i Oslo, spørsmål og svar, materiale og overflate, etter hvert kundesitater.</td><td>Med i forslaget. Et portrett eller verkstedbilde mangler.</td></tr>
+<tr><td>8</td><td><b>Google Merchant Center med gratis oppføringer:</b> bekreft domenet, velg Norge og legg inn produktfeeden. Håndlagde varer bruker identifier_exists=no.</td><td><a href="produktfeed.xml">Feeden er klar</a>. Kontoen lager du selv.</td></tr>
+<tr><td>9</td><td>Titler med ord folk søker på: «sofabord i stål», «bokhylle i stål», «designmøbler Oslo».</td><td>Med i titlene i forslaget</td></tr>
+<tr><td>10</td><td><b>Samtykke til informasjonskapsler</b> (ekomloven § 3-15 fra 2025) må være på plass før Meta-piksel eller Google Ads-tagger. Det krever Google Consent Mode v2.</td><td>Ikke gjort. Bør løses før annonser.</td></tr>
+<tr><td>11</td><td>Meta-annonser fra katalogen (Advantage+) med samme feed. Optimaliser mot «startet kjøp» til det kommer nok salg.</td><td>Senere</td></tr>
+</table>
+<p class="merk">Kilder: Baymard Institute (møbel-UX 2026, bilder i skala, mål), Google Search Central (strukturerte data for produkter, JavaScript-SEO), Google Merchant Center-hjelp, Stripe-dokumentasjon (Klarna, Vipps), PostNord 2026, Lovdata. Usikkert: når Vipps åpnes for alle i Stripe, hvor lang behandlingstid Google godtar (20–40 virkedager bør testes med ett produkt), og søkevolumer.</p>
+
+<h2>4. Forslagene i denne forhåndsvisningen</h2>
+<ul>
+<li><a href="butikk/"><b>Butikkforside</b></a>: bilder og priser først, fire trygghetspunkter, kategorifilter, «Slik bestiller du» og om studio. Kan bli ny forside eller landingsside for annonser, mens tegningskatalogen blir en egen side.</li>
+<li><b>25 produktsider</b>: galleri, pris og Kjøp øverst, trygghetspunkter, mål, tegninger, «Slik bestiller du», spørsmål og svar, og flere møbler. Kjøpsstripe på mobil.</li>
+<li><a href="produktfeed.xml"><b>Produktfeed</b></a> med de 17 møblene som kan kjøpes, og <a href="sitemap.xml">sitemap</a>.</li>
+<li>Generatoren: <code>Verktøy\nettside_forslag.js</code> bygger alt fra de samme dataene som forsiden. Bygg på nytt etter endringer i pris eller bilder.</li>
+</ul>
+<p class="merk">Kjøp-knappene i forhåndsvisningen går til de ekte Stripe-lenkene. Ikke fullfør et kjøp. Alle sidene har noindex.</p>
+
+<h2>5. Forslag til rekkefølge</h2>
+<ol>
+<li>Les gjennom og si «Publiser nå» for Kjøp-knappene og salgsbetingelsene.</li>
+<li>Slå på kvitteringer og norsk språk i Stripe.</li>
+<li>Bestem fraktpris for Oslo.</li>
+<li>Publiser produktsidene på studio-glazebrook.no/mobler/… og la forsiden lenke til dem.</li>
+<li>Opprett Merchant Center med gratis oppføringer og bruk feeden.</li>
+<li>Ta bilder i skala og et portrett.</li>
+<li>Legg inn samtykkebanner, og start deretter annonser.</li>
+</ol>
+</div>
+</body>
+</html>
